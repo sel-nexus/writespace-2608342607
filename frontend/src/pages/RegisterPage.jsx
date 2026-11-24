@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { getSession, register, roleHome } from '../utils/auth';
 
-const inputStyle = 'w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 '
-  + 'focus:outline-none focus:ring-2 focus:ring-orange-700';
+const inputStyle = 'w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 '
+  + 'px-4 py-3 text-slate-900 dark:text-slate-100 '
+  + 'dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-700 dark:focus:ring-orange-400';
 const buttonStyle = 'w-full rounded-full bg-orange-800 px-5 py-3 font-semibold text-white shadow-sm '
-  + 'hover:bg-orange-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 '
-  + 'focus-visible:ring-offset-2';
+  + 'hover:bg-orange-900 dark:hover:bg-orange-700 focus-visible:outline-none '
+    + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 '
+  + 'focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950';
 
 /** Validate input before attempting account and session persistence.
  * Args:
@@ -50,21 +52,37 @@ export default function RegisterPage({ onSessionChange }) {
 
   if (session) return <Navigate to={roleHome(session.role)} replace />;
   return (
-    <main id="main-content" className="flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-12">
-      <section aria-labelledby="auth-title" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-        <Link to="/" aria-label="WriteSpace home" className="rounded-lg font-serif text-2xl font-bold focus-visible:ring-2 focus-visible:ring-orange-700">
+    <main id="main-content" className={
+      'flex min-h-[100dvh] items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12'
+    }>
+      <section aria-labelledby="auth-title" className={
+        'w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700 bg-white '
+        + 'dark:bg-slate-900 p-6 shadow-sm sm:p-10'
+      }>
+        <Link to="/" aria-label="WriteSpace home" className={
+          'rounded-lg font-serif text-2xl font-bold focus-visible:ring-2 focus-visible:ring-orange-700 '
+          + 'dark:focus-visible:ring-orange-400'
+        }>
           WriteSpace
-          <span className="text-orange-800">.</span>
+          <span className="text-orange-800 dark:text-orange-300">.</span>
         </Link>
-        <p className="mt-8 text-xs font-bold uppercase tracking-widest text-orange-800">A place for your words</p>
-        <h1 id="auth-title" className="mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900">Make room to write.</h1>
-        <p id="demo-warning" className="mt-4 text-sm leading-relaxed text-slate-600">
+        <p className={
+          'mt-8 text-xs font-bold uppercase tracking-widest text-orange-800 dark:text-orange-300'
+        }>
+          A place for your words
+        </p>
+        <h1 id="auth-title" className={
+          'mt-2 font-serif text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100'
+        }>
+          Make room to write.
+        </h1>
+        <p id="demo-warning" className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           Browser-local demo only. Passwords are stored in plaintext. Never use real passwords or sensitive data.
         </p>
 
         <form onSubmit={submit} noValidate aria-describedby="demo-warning" className="mt-8 space-y-5">
           <div>
-            <label htmlFor="displayName" className="mb-2 block text-sm font-semibold text-slate-800">Display Name</label>
+            <label htmlFor="displayName" className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-100">Display Name</label>
             <input
               id="displayName"
               name="displayName"
@@ -79,11 +97,11 @@ export default function RegisterPage({ onSessionChange }) {
               className={inputStyle}
             />
             {errors.displayName && (
-              <p id="displayName-error" role="alert" className="mt-2 text-sm text-red-700">{errors.displayName}</p>
+              <p id="displayName-error" role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors.displayName}</p>
             )}
           </div>
           <div>
-            <label htmlFor="username" className="mb-2 block text-sm font-semibold text-slate-800">Username</label>
+            <label htmlFor="username" className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-100">Username</label>
             <input
               id="username"
               name="username"
@@ -98,11 +116,11 @@ export default function RegisterPage({ onSessionChange }) {
               className={inputStyle}
             />
             {errors.username && (
-              <p id="username-error" role="alert" className="mt-2 text-sm text-red-700">{errors.username}</p>
+              <p id="username-error" role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors.username}</p>
             )}
           </div>
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-800">Password</label>
+            <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-100">Password</label>
             <input
               id="password"
               name="password"
@@ -117,11 +135,11 @@ export default function RegisterPage({ onSessionChange }) {
               className={inputStyle}
             />
             {errors.password && (
-              <p id="password-error" role="alert" className="mt-2 text-sm text-red-700">{errors.password}</p>
+              <p id="password-error" role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors.password}</p>
             )}
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-800">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-800 dark:text-slate-100">Confirm Password</label>
             <input
               id="confirmPassword"
               name="confirmPassword"
@@ -136,17 +154,24 @@ export default function RegisterPage({ onSessionChange }) {
               className={inputStyle}
             />
             {errors.confirmPassword && (
-              <p id="confirmPassword-error" role="alert" className="mt-2 text-sm text-red-700">{errors.confirmPassword}</p>
+              <p id="confirmPassword-error" role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors.confirmPassword}</p>
             )}
           </div>
           {error && (
-            <p id="auth-error" role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
+            <p id="auth-error" role="alert" className={
+              'rounded-lg bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-300'
+            }>
+              {error}
+            </p>
           )}
           <button type="submit" className={buttonStyle}>Register</button>
         </form>
-        <p className="mt-6 text-sm text-slate-600">
+        <p className="mt-6 text-sm text-slate-600 dark:text-slate-300">
           Already have an account?
-          <Link to="/login" className="ml-2 rounded-sm font-semibold text-orange-800 underline focus-visible:ring-2 focus-visible:ring-orange-700">
+          <Link to="/login" className={
+            'ml-2 rounded-sm font-semibold text-orange-800 dark:text-orange-300 underline '
+            + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400'
+          }>
             Login
           </Link>
         </p>

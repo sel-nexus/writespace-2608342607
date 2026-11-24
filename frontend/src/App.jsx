@@ -41,11 +41,13 @@ export default function App() {
   const authPage = ['/login', '/register'].includes(location.pathname);
 
   return (
-    <div className="min-h-[100dvh] bg-white font-sans text-slate-800">
+    <div className={
+      'min-h-[100dvh] bg-white dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100'
+    }>
       <a
         href="#main-content"
-        className={'sr-only rounded-lg bg-white p-3 text-orange-800 focus:not-sr-only focus:fixed '
-          + 'focus:left-4 focus:top-4 focus:z-30 focus:ring-2 focus:ring-orange-700'}
+        className={'sr-only rounded-lg bg-white dark:bg-slate-900 p-3 text-orange-800 dark:text-orange-300 focus:not-sr-only focus:fixed '
+          + 'focus:left-4 focus:top-4 focus:z-30 focus:ring-2 focus:ring-orange-700 dark:focus:ring-orange-400'}
       >
         Skip to content
       </a>

@@ -1,0 +1,80 @@
+/** Exercise real dark writing surfaces on inherited desktop/mobile projects; defer execution to the lead. */
+import { test, expect } from './fixtures';
+
+/** Read the actual UI-persisted collection without seeding or bypassing mutations. */
+async function posts(page) {
+  return page.evaluate(() => JSON.parse(localStorage.getItem('writespace_posts') ?? '[]'));
+}
+
+test('dark registration, invalid writing, create/read/edit/save and light toggle preserve local data', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/);
+  await expect(page.locator('#root > div')).toHaveCSS('background-color', 'rgb(2, 6, 23)');
+  await expect(page.locator('#hero-title')).toHaveCSS('color', 'rgb(241, 245, 249)');
+  await page.getByRole('link', { name: 'Get Started Free', exact: true }).click();
+  await expect(page).toHaveURL('/register');
+  await expect(page.locator('main')).toHaveCSS('background-color', 'rgb(2, 6, 23)');
+  await expect(page.locator('main > section')).toHaveCSS('background-color', 'rgb(15, 23, 42)');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByLabel('Username')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#username-error')).toHaveCSS('color', 'rgb(252, 165, 165)');
+  await page.getByLabel('Display Name').fill('Theme Writer');
+  await page.getByLabel('Username').fill('theme-writer');
+  await page.getByLabel('Password', { exact: true }).fill('demo-only');
+  await page.getByLabel('Confirm Password').fill('demo-only');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page).toHaveURL('/blogs');
+  const session = await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')));
+  expect(session).toMatchObject({ displayName: 'Theme Writer', username: 'theme-writer', role: 'user' });
+  const accounts = await page.evaluate(() => localStorage.getItem('writespace_users'));
+  expect(JSON.parse(accounts)).toEqual([expect.objectContaining({ id: session.userId, role: 'user' })]);
+  await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
+  await expect(page.locator('main section')).toHaveCSS('background-color', 'rgb(15, 23, 42)');
+  await page.getByRole('link', { name: 'Write New Post', exact: true }).click();
+  await expect(page.getByLabel('Content')).toHaveValue('');
+  await expect(page.locator('form')).toHaveCSS('background-color', 'rgb(15, 23, 42)');
+  await expect(page.getByLabel('Content')).toHaveCSS('background-color', 'rgb(2, 6, 23)');
+  await page.getByRole('button', { name: 'Publish Post' }).click();
+  await expect(page.getByLabel('Title')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.getByLabel('Content')).toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#content-error')).toHaveCSS('color', 'rgb(252, 165, 165)');
+  expect(await posts(page)).toEqual([]);
+  const content = 'Dark writing\n\n  <script>plain text</script>  ';
+  await page.getByLabel('Title').fill('A themed thought');
+  await page.getByLabel('Content').fill(content);
+  await page.getByLabel('Content').focus();
+  await expect(page.getByLabel('Content')).toHaveCSS('--tw-ring-color', '#fb923c');
+  await page.getByRole('button', { name: 'Publish Post' }).click();
+  await expect(page.getByRole('heading', { name: 'A themed thought' })).toBeVisible();
+  const saved = (await posts(page))[0];
+  expect(saved).toMatchObject({ title: 'A themed thought', content, authorId: session.userId, authorName: session.displayName });
+  await expect(page).toHaveURL(`/blog/${saved.id}`);
+  expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(content);
+  await expect(page.locator('article script')).toHaveCount(0);
+  await expect(page.locator('article h1')).toHaveCSS('color', 'rgb(241, 245, 249)');
+  await expect(page.locator('article time')).toHaveCSS('color', 'rgb(203, 213, 225)');
+  await expect(page.getByRole('button', { name: 'Delete', exact: true })).toHaveCSS('background-color', 'rgb(69, 10, 10)');
+  await page.getByRole('link', { name: 'Back to All Posts' }).click();
+  await expect(page.locator('article')).toHaveCSS('background-color', 'rgb(15, 23, 42)');
+  await page.getByRole('link', { name: saved.title, exact: true }).click();
+  await page.getByRole('link', { name: 'Edit', exact: true }).click();
+  await expect(page.getByLabel('Title')).toHaveValue(saved.title);
+  await expect(page.getByLabel('Content')).toHaveValue(content);
+  const updated = { ...saved, title: 'Saved themed thought', content: 'Revised\n\n  retained spaces  ' };
+  await page.getByLabel('Title').fill(updated.title);
+  await page.getByLabel('Content').fill(updated.content);
+  await page.getByRole('button', { name: 'Save Changes' }).click();
+  await expect(page.getByRole('heading', { name: updated.title })).toBeVisible();
+  expect(await posts(page)).toEqual([updated]);
+  expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(updated.content);
+  await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
+  await expect(page.locator('html')).not.toHaveClass(/\bdark\b/);
+  await expect(page.locator('#root > div')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
+  await expect(page.locator('article h1')).toHaveCSS('color', 'rgb(15, 23, 42)');
+  expect(await page.evaluate(() => localStorage.getItem('writespace_theme'))).toBe('light');
+  expect(await posts(page)).toEqual([updated]);
+  expect(await page.evaluate(() => localStorage.getItem('writespace_users'))).toBe(accounts);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')))).toEqual(session);
+});
