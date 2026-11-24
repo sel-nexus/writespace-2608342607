@@ -45,7 +45,7 @@ test('dark registration, invalid writing, create/read/edit/save and light toggle
   await page.getByLabel('Title').fill('A themed thought');
   await page.getByLabel('Content').fill(content);
   await page.getByLabel('Content').focus();
-  await expect(page.getByLabel('Content')).toHaveCSS('--tw-ring-color', '#fb923c');
+  await expect(page.getByLabel('Content')).toHaveCSS('--tw-ring-color', 'rgb(251 146 60 / 1)');
   await page.getByRole('button', { name: 'Publish Post' }).click();
   await expect(page.getByRole('heading', { name: 'A themed thought' })).toBeVisible();
   const saved = (await posts(page))[0];

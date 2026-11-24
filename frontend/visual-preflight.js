@@ -22,6 +22,8 @@ const mobile = { width: 390, height: 844 };
  */
 async function capture(page, name) {
   await page.locator('main').waitFor({ state: 'visible' });
+  // Let existing color transitions settle before recording a theme's final appearance.
+  await page.waitForTimeout(350);
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
@@ -116,25 +118,35 @@ async function main() {
   const browser = await chromium.launch({ channel: 'chromium' });
   let context;
   try {
-    context = await browser.newContext({ viewport: desktop, baseURL });
+    context = await browser.newContext({ viewport: desktop, baseURL, colorScheme: 'light' });
     const page = await context.newPage();
     await page.goto('/');
     await capture(page, 'desktop-landing-empty');
+    await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
+    await capture(page, 'desktop-landing-dark');
     const postId = await createLocalRecords(page);
     await page.reload();
     await capture(page, 'desktop-landing');
     await page.setViewportSize(mobile);
     await capture(page, 'mobile-landing');
+    await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
+    await capture(page, 'mobile-landing-light');
+    await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
     await page.getByRole('button', { name: 'Open menu', exact: true }).click();
     await capture(page, 'mobile-landing-open-nav');
     await page.getByRole('link', { name: 'Login', exact: true }).first().click();
     await page.setViewportSize(desktop);
     await capture(page, 'desktop-login');
+    await page.getByRole('button', { name: 'Login', exact: true }).click();
+    await capture(page, 'desktop-login-errors-dark');
     await page.getByLabel('Username', { exact: true }).fill('admin');
     await page.getByLabel('Password', { exact: true }).fill('admin');
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     await page.waitForURL('**/admin');
     await capture(page, 'desktop-admin');
+    await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
+    await capture(page, 'desktop-admin-light');
+    await page.getByRole('button', { name: 'Dark mode', exact: true }).click();
     await page.getByRole('link', { name: 'Users', exact: true }).click();
     await page.waitForURL('**/users');
     await capture(page, 'desktop-users');
@@ -155,6 +167,8 @@ async function main() {
     await page.locator(`a[href="/blog/${postId}"]`).first().click();
     await page.waitForURL(`**/blog/${postId}`);
     await capture(page, 'desktop-read');
+    await page.setViewportSize(mobile);
+    await capture(page, 'mobile-read-dark');
     console.log(`Visual preflight evidence saved to ${outputDirectory}`);
   } finally {
     try {

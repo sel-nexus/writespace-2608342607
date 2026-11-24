@@ -30,7 +30,12 @@ Playwright is pinned to 1.64.1 with full Chromium channel. Install the matching 
 Vercel: select Root Directory `frontend`, Vite preset, output `dist`; copy the repository's exact rewrite-only vercel.json into the deployment root (frontend) before deployment. It contains no prohibited build/framework keys. Root settings are managed in Vercel project settings, not extra JSON keys. Hosting deployment itself was not performed.
 
 ## Verification outcome
-331 unit/component tests passed. 54 desktop/mobile browser cases passed across full and targeted runs (initial full run 52 passed/2 excerpt expectation errors, corrected discovery rerun 6 passed). Independent critic PASS, score 1.00, no high failures. Production build passed. Screenshots/accessibility/styles/HTML captured and inspected. Docker image execution was not claimed.
+Change run: 380 unit/component tests passed (baseline 331). All 62 distinct desktop/mobile browser cases passed across a full run (60 passed, two equivalent CSS-serialization expectation errors) and corrected targeted rerun (2 passed). Independent critic final PASS, score 1.00, no high failures. Production build passed. Representative light/dark screenshots, accessibility, styles and HTML were captured and inspected. Docker image execution was not claimed.
+
+## Appearance
+Use the moon button in either navbar to switch light/dark appearance. The pressed state indicates dark mode. A valid `writespace_theme` choice persists across reload, navigation and logout; otherwise startup uses the OS preference or light fallback. Storage-denied browsers can still switch in the current page. Login/register inherit the mode and keep their existing header-free layout; their home logo returns to the public toggle. No account/post data is changed.
+
+This theme-only change preserves the shipped orange/slate design. Its hero/auth/dashboard treatments differ from the PRD gradient descriptions; they are retained baseline exceptions, not a claim of full visual fidelity. See CHANGELOG.md.
 
 ## Dependency warning
 Pinned dependency audit reported 10 advisories (3 moderate, 5 high, 2 critical), including router/build/test dependencies. Required stack versions were retained; review upgrades before exposing a deployed demo. Build/dev servers should never be used as public production servers.
