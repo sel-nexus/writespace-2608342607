@@ -1,0 +1,133 @@
+/** Exercise local identity journeys after the later role-home slices are wired.
+ * Notes:
+ *   Written now, intentionally not run during the identity slice.
+ *   Use only plaintext demonstration credentials, never real passwords.
+ */
+import { test, expect } from './fixtures';
+
+/** Open responsive navigation only when the hamburger is displayed. */
+async function openNavigation(page) {
+  const button = page.getByRole('button', { name: 'Open navigation menu', exact: true });
+  if (await button.isVisible()) await button.click();
+}
+
+/** Open the responsive public menu when necessary. */
+async function openPublicMenu(page) {
+  const button = page.getByRole('button', { name: 'Open menu', exact: true });
+  if (await button.isVisible()) await button.click();
+}
+
+/** Logout using the account disclosure, not programmatic storage changes. */
+async function logout(page, displayName) {
+  await openNavigation(page);
+  await page.getByRole('button', { name: `Account options for ${displayName}` }).click();
+  await page.getByRole('button', { name: 'Logout', exact: true }).click();
+  await expect(page).toHaveURL('/');
+  expect(await page.evaluate(() => localStorage.getItem('writespace_session'))).toBeNull();
+}
+
+test('invalid then valid registration, reload, logout and persisted login journey', async ({ page }) => {
+  await page.goto('/');
+  await openPublicMenu(page);
+  await page.getByRole('link', { name: 'Get Started', exact: true }).click();
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByLabel('Display Name')).toHaveAttribute('aria-invalid', 'true');
+  await page.getByLabel('Display Name').fill('Journey Reader');
+  await page.getByLabel('Username').fill('admin');
+  await page.getByLabel('Password', { exact: true }).fill('demo-password');
+  await page.getByLabel('Confirm Password').fill('different');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Passwords must match.');
+  await page.getByLabel('Confirm Password').fill('demo-password');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('reserved');
+  await page.getByLabel('Username').fill('journey-reader');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page).toHaveURL('/blogs');
+  const saved = await page.evaluate(() => ({
+    users: JSON.parse(localStorage.getItem('writespace_users')),
+    session: JSON.parse(localStorage.getItem('writespace_session')),
+  }));
+  expect(saved.users).toHaveLength(1);
+  expect(saved.session).toMatchObject({ username: 'journey-reader', displayName: 'Journey Reader', role: 'user' });
+  expect(saved.users[0].id).toBe(saved.session.userId);
+  await page.reload();
+  await openNavigation(page);
+  await expect(page.getByRole('button', { name: 'Account options for Journey Reader' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Users', exact: true })).toHaveCount(0);
+  await logout(page, 'Journey Reader');
+  await openPublicMenu(page);
+  await page.getByRole('link', { name: 'Get Started', exact: true }).click();
+  await page.getByLabel('Display Name').fill('Duplicate Reader');
+  await page.getByLabel('Username').fill('journey-reader');
+  await page.getByLabel('Password', { exact: true }).fill('demo-password');
+  await page.getByLabel('Confirm Password').fill('demo-password');
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('already taken');
+  await page.getByRole('link', { name: 'Login', exact: true }).click();
+  await page.getByLabel('Username').fill('journey-reader');
+  await page.getByLabel('Password').fill('wrong');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Invalid username or password.');
+  await page.getByLabel('Password').fill('demo-password');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await expect(page).toHaveURL('/blogs');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')))).toEqual(saved.session);
+  await openNavigation(page);
+  await page.getByRole('link', { name: 'WriteSpace home' }).click();
+  await openPublicMenu(page);
+  await expect(page.getByRole('link', { name: 'Go to Dashboard' })).toHaveAttribute('href', '/blogs');
+  await page.getByRole('link', { name: 'Go to Dashboard' }).click();
+  await logout(page, 'Journey Reader');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_users')).length)).toBe(1);
+});
+
+test('permanent default admin login and role navigation persist across reload', async ({ page }) => {
+  await page.goto('/');
+  await openPublicMenu(page);
+  await page.getByRole('navigation', { name: 'Public navigation' }).getByRole('link', { name: 'Login' }).click();
+  await page.getByLabel('Username').fill('admin');
+  await page.getByLabel('Password').fill('admin');
+  await page.getByRole('button', { name: 'Login', exact: true }).click();
+  await expect(page).toHaveURL('/admin');
+  await page.reload();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')))).toEqual({
+    userId: 'default-admin', username: 'admin', displayName: 'Admin', role: 'admin',
+  });
+  await openNavigation(page);
+  await expect(page.getByRole('img', { name: 'admin avatar' })).toHaveText('👑');
+  await page.getByRole('link', { name: 'Users', exact: true }).click();
+  await expect(page).toHaveURL('/users');
+  await openNavigation(page);
+  await page.getByRole('link', { name: 'All Blogs', exact: true }).click();
+  await expect(page).toHaveURL('/blogs');
+  await logout(page, 'Admin');
+});
+
+// Explicit isolated direct-entry boundary tests are the exception to link-only journeys.
+for (const path of ['/blogs', '/blog/missing', '/write', '/edit/missing', '/admin', '/users']) {
+  test(`guest direct-entry guard at ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page).toHaveURL('/login');
+    await expect(page.getByLabel('Username')).toBeVisible();
+  });
+}
+for (const path of ['/admin', '/users']) {
+  test(`regular-user direct-entry guard at ${path}`, async ({ page }) => {
+    await page.addInitScript(() => {
+      const account = {
+        id: '11111111-1111-4111-8111-111111111111', displayName: 'Boundary Reader',
+        username: 'boundary-reader', password: 'demo-only', role: 'user', createdAt: '2026-03-04T12:00:00.000Z',
+      };
+      localStorage.setItem('writespace_users', JSON.stringify([account]));
+      localStorage.setItem('writespace_session', JSON.stringify({
+        userId: account.id, username: account.username, displayName: account.displayName, role: account.role,
+      }));
+    });
+    await page.goto(path);
+    await expect(page).toHaveURL('/blogs');
+    await openNavigation(page);
+    await expect(page.getByRole('link', { name: 'Users', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Account options for Boundary Reader' })).toBeVisible();
+  });
+}
