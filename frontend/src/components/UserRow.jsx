@@ -4,7 +4,10 @@ import { Avatar } from './Avatar';
 import { formatPostDate } from '../utils/posts';
 
 const badges = {
-  admin: 'bg-violet-100 text-violet-700 ring-violet-300', user: 'bg-indigo-100 text-indigo-700 ring-indigo-300',
+  admin: 'bg-violet-100 text-violet-700 ring-violet-300 '
+    + 'dark:bg-violet-950 dark:text-violet-300 dark:ring-violet-700',
+  user: 'bg-indigo-100 text-indigo-700 ring-indigo-300 '
+    + 'dark:bg-indigo-950 dark:text-indigo-300 dark:ring-indigo-700',
 };
 
 /** Render an account with explained default/current deletion protection.
@@ -23,7 +26,7 @@ export function UserRow({ account, currentId, onDelete, mobile = false }) {
   const identity = (
     <div className="flex min-w-0 items-center gap-3">
       <Avatar role={account.role} />
-      <span className="min-w-0 break-words font-semibold text-slate-900">{account.displayName}</span>
+      <span className="min-w-0 break-words font-semibold text-slate-900 dark:text-slate-100">{account.displayName}</span>
     </div>
   );
   const badge = (
@@ -40,13 +43,17 @@ export function UserRow({ account, currentId, onDelete, mobile = false }) {
         title={reason || undefined}
         aria-describedby={reason ? `protect-${mobile ? 'mobile' : 'table'}-${account.id}` : undefined}
         onClick={() => onDelete(account)}
-        className={'rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-red-700 hover:bg-red-100 '
-          + 'focus-visible:ring-2 focus-visible:ring-red-500 disabled:cursor-not-allowed disabled:opacity-60'}
+        className={
+          'rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-2 '
+          + 'text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 focus-visible:ring-2 '
+          + 'focus-visible:ring-red-500 dark:focus-visible:ring-red-400 '
+          + 'disabled:cursor-not-allowed disabled:opacity-60'
+        }
       >
         Delete
       </button>
       {reason && (
-        <p id={`protect-${mobile ? 'mobile' : 'table'}-${account.id}`} className="mt-2 max-w-48 text-xs text-slate-600">
+        <p id={`protect-${mobile ? 'mobile' : 'table'}-${account.id}`} className="mt-2 max-w-48 text-xs text-slate-600 dark:text-slate-300">
           {reason}
         </p>
       )}
@@ -54,14 +61,17 @@ export function UserRow({ account, currentId, onDelete, mobile = false }) {
   );
   if (mobile) {
     return (
-      <article aria-label={`Account ${account.username}`} className="rounded-2xl border border-slate-200 bg-white p-5">
+      <article aria-label={`Account ${account.username}`} className={
+        'rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 '
+        + 'dark:text-slate-100'
+      }>
         {identity}
         <dl className="my-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-sm">
-          <dt className="text-slate-600">Username</dt>
+          <dt className="text-slate-600 dark:text-slate-300">Username</dt>
           <dd className="min-w-0 break-words">{account.username}</dd>
-          <dt className="text-slate-600">Role</dt>
+          <dt className="text-slate-600 dark:text-slate-300">Role</dt>
           <dd>{badge}</dd>
-          <dt className="text-slate-600">Created</dt>
+          <dt className="text-slate-600 dark:text-slate-300">Created</dt>
           <dd>{date}</dd>
         </dl>
         {action}
@@ -69,11 +79,11 @@ export function UserRow({ account, currentId, onDelete, mobile = false }) {
     );
   }
   return (
-    <tr className="border-t border-slate-200">
+    <tr className="border-t border-slate-200 dark:border-slate-700">
       <th scope="row" className="max-w-64 px-4 py-4 text-left">{identity}</th>
       <td className="max-w-48 break-words px-4 py-4">{account.username}</td>
       <td className="px-4 py-4">{badge}</td>
-      <td className="px-4 py-4 text-sm text-slate-600">{date}</td>
+      <td className="px-4 py-4 text-sm text-slate-600 dark:text-slate-300">{date}</td>
       <td className="px-4 py-4">{action}</td>
     </tr>
   );
