@@ -11,6 +11,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import ReadBlog from './pages/ReadBlog';
 import WriteBlog from './pages/WriteBlog';
+import AdminDashboard from './pages/AdminDashboard';
+import UserManagement from './pages/UserManagement';
 
 /** Render completed routes and choose their session-aware header.
  * Returns:
@@ -63,6 +65,10 @@ export default function App() {
           <Route path="/blog/:id" element={<ReadBlog />} />
           <Route path="/write" element={<WriteBlog />} />
           <Route path="/edit/:id" element={<WriteBlog />} />
+        </Route>
+        <Route element={<ProtectedRoute adminOnly />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/users" element={<UserManagement />} />
         </Route>
       </Routes>
     </div>
