@@ -3,6 +3,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Avatar } from './Avatar';
+import { ThemeToggle } from './ThemeToggle';
 
 const roleStyles = { admin: 'bg-violet-600', user: 'bg-indigo-500' };
 
@@ -25,7 +26,7 @@ export function PublicNavbar({ session = null }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-100 bg-white shadow-sm">
+    <header className="sticky top-0 z-20 border-b border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <nav
         aria-label="Public navigation"
         className={'mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between '
@@ -35,18 +36,19 @@ export function PublicNavbar({ session = null }) {
           to="/"
           aria-label="WriteSpace home"
           onClick={closeMenu}
-          className={'rounded-lg font-serif text-2xl font-bold tracking-tight text-slate-900 '
+          className={'mr-auto rounded-lg font-serif text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 '
             + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700'}
         >
           WriteSpace
-          <span className="text-orange-800">.</span>
+          <span className="text-orange-800 dark:text-orange-400">.</span>
         </Link>
+        <ThemeToggle />
         <button
           type="button"
           aria-expanded={menuOpen}
           aria-controls="public-menu"
           onClick={() => setMenuOpen(!menuOpen)}
-          className={'rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-800 '
+          className={'rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-800 dark:border-slate-600 dark:text-slate-200 '
             + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 sm:hidden'}
         >
           {menuOpen ? 'Close menu' : 'Open menu'}
@@ -58,7 +60,7 @@ export function PublicNavbar({ session = null }) {
         >
           {signedIn ? (
             <>
-              <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-800">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-slate-800 dark:text-slate-200">
                 <Avatar role={session.role} />
                 <span className="max-w-48 truncate">
                   {session.displayName}
@@ -81,7 +83,7 @@ export function PublicNavbar({ session = null }) {
                 to="/login"
                 onClick={closeMenu}
                 className={'rounded-full px-4 py-2.5 text-center text-sm font-semibold text-slate-800 '
-                  + 'hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700'}
+                  + 'hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700'}
               >
                 Login
               </Link>
