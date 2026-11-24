@@ -1,5 +1,5 @@
 /** Test local forms and app identity propagation with state rereads. */
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
@@ -80,6 +80,48 @@ it('persists registration as user and redirects only on success', async () => {
   expect(screen.getByRole('heading')).toHaveTextContent('Reader home');
   expect(getUsers()).toHaveLength(1);
   expect(getSession().role).toBe('user');
+});
+it.each([
+  ['large text', 'Large Reader '.repeat(1000).trim(), 'large-reader-'.repeat(1000), ` ${'demo-'.repeat(2000)} `],
+  ['literal markup', '<img src=x onerror="alert(1)"><script>alert(1)</script>', 'markup-reader', 'demo-only'],
+])('roundtrips %s through registration, App identity rendering, logout and login', async (kind, displayName, username, password) => {
+  const user = userEvent.setup();
+  const { container } = render(
+    <MemoryRouter initialEntries={['/register']}>
+      <App />
+    </MemoryRouter>,
+  );
+  // Change whole values to exercise controlled inputs without thousands of keystroke delays.
+  for (const [label, value] of [['Display Name', displayName], ['Username', username],
+    ['Password', password], ['Confirm Password', password]]) {
+    fireEvent.change(screen.getByLabelText(label, { exact: true }), { target: { value } });
+    expect(screen.getByLabelText(label, { exact: true })).toHaveValue(value);
+  }
+  await user.click(screen.getByRole('button', { name: 'Register', exact: true }));
+  const session = getSession();
+  expect(session).toEqual(expect.objectContaining({ displayName, username, role: 'user' }));
+  expect(getUsers()).toEqual([expect.objectContaining({ displayName, username, password })]);
+  const accounts = localStorage.getItem('writespace_users');
+  let accountButton = screen.getByRole('button', { name: `Account options for ${displayName}` });
+  expect(within(accountButton).getByText(displayName, { exact: true }).textContent).toBe(displayName);
+  expect(container.querySelector('script, img[src="x"], [onerror]')).toBeNull();
+  await user.click(screen.getByRole('link', { name: 'WriteSpace home' }));
+  const publicNavigation = within(screen.getByRole('navigation', { name: 'Public navigation' }));
+  expect(publicNavigation.getByText(displayName, { exact: true }).textContent).toBe(displayName);
+  expect(container.querySelector('script, img[src="x"], [onerror]')).toBeNull();
+  await user.click(screen.getByRole('link', { name: 'Go to Dashboard' }));
+  await user.click(screen.getByRole('button', { name: `Account options for ${displayName}` }));
+  await user.click(screen.getByRole('button', { name: 'Logout', exact: true }));
+  expect(getSession()).toBeNull();
+  await user.click(within(screen.getByRole('navigation', { name: 'Footer navigation' })).getByRole('link', { name: 'Login' }));
+  fireEvent.change(screen.getByLabelText('Username'), { target: { value: username } });
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: password } });
+  await user.click(screen.getByRole('button', { name: 'Login', exact: true }));
+  expect(getSession()).toEqual(session);
+  expect(localStorage.getItem('writespace_users')).toBe(accounts);
+  accountButton = screen.getByRole('button', { name: `Account options for ${displayName}` });
+  expect(within(accountButton).getByText(displayName, { exact: true }).textContent).toBe(displayName);
+  expect(container.querySelector('script, img[src="x"], [onerror]')).toBeNull();
 });
 it('associates mismatch errors and saves nothing', async () => {
   const user = setup('/register');

@@ -5,6 +5,10 @@ import { getUsers, saveUsers } from './storage';
 
 const fields = { displayName: 'Reader', username: 'reader', password: 'demo', confirmPassword: 'demo' };
 const admin = { userId: 'default-admin', username: 'admin', displayName: 'Admin', role: 'admin' };
+const invalidText = [
+  ['omitted', undefined], ['null', null], ['number', 42], ['boolean', true],
+  ['object', {}], ['array', []],
+];
 
 describe('local identity', () => {
   it('keeps default admin permanently available independent of corrupt accounts', () => {
@@ -40,6 +44,61 @@ describe('local identity', () => {
   it.each(Object.keys(fields))('requires %s', (key) => {
     expect(() => register({ ...fields, [key]: ' ' })).toThrow('required');
     expect(getUsers()).toEqual([]);
+  });
+  it.each(Object.keys(fields).flatMap((key) => invalidText.map(([kind, value]) => [key, kind, value])))
+  ('rejects independently %s registration field when %s without changing storage', (key, kind, value) => {
+    register(fields);
+    const accounts = localStorage.getItem('writespace_users');
+    const session = localStorage.getItem('writespace_session');
+    const candidate = { ...fields, username: 'another-reader' };
+    if (kind === 'omitted') delete candidate[key];
+    else candidate[key] = value;
+    expect(() => register(candidate)).toThrow('All fields are required.');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+  });
+  it.each(['username', 'password'].flatMap((key) => invalidText.map(([kind, value]) => [key, kind, value])))
+  ('rejects independently %s credential when %s without changing storage', (key, kind, value) => {
+    register(fields);
+    const accounts = localStorage.getItem('writespace_users');
+    const session = localStorage.getItem('writespace_session');
+    const credentials = { username: fields.username, password: fields.password, [key]: value };
+    expect(() => authenticate(credentials.username, credentials.password)).toThrow('Invalid username or password.');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+  });
+  it('roundtrips large display names, usernames and exact passwords without truncation', () => {
+    const displayName = 'Large reader '.repeat(1000).trim();
+    const username = 'large-reader-'.repeat(1000);
+    const password = ` ${'demo-password-'.repeat(1000)} `;
+    const session = register({ displayName, username, password, confirmPassword: password });
+    expect(getUsers()).toEqual([expect.objectContaining({ displayName, username, password })]);
+    expect(getSession()).toEqual({ ...session, displayName, username });
+    const accounts = localStorage.getItem('writespace_users');
+    clearSession();
+    expect(authenticate(username, password)).toEqual(session);
+    expect(getSession()).toEqual(session);
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+  });
+  it('rejects a generated account ID collision before changing accounts or session', () => {
+    const existing = register(fields);
+    const accounts = localStorage.getItem('writespace_users');
+    const session = localStorage.getItem('writespace_session');
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(existing.userId);
+    expect(() => register({ ...fields, username: 'another-reader' })).toThrow('Unable to create a unique account ID.');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+    expect(getSession()).toEqual(existing);
+  });
+  it('leaves accounts and session byte-for-byte unchanged when ID generation throws', () => {
+    const existing = register(fields);
+    const accounts = localStorage.getItem('writespace_users');
+    const session = localStorage.getItem('writespace_session');
+    vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => { throw new Error('UUID unavailable'); });
+    expect(() => register({ ...fields, username: 'another-reader' })).toThrow('UUID unavailable');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+    expect(getSession()).toEqual(existing);
   });
   it('requires matching passwords', () => {
     expect(() => register({ ...fields, confirmPassword: 'wrong' })).toThrow('match');

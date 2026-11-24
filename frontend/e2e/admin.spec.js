@@ -164,3 +164,36 @@ test('admin creates both roles, protects current/default, retains author posts a
   await expect(page.getByRole('region', { name: 'Total Posts' })).toContainText('0');
   await expect(page.getByRole('region', { name: 'Total Users', exact: true })).toContainText('2');
 });
+
+test('admin dashboard shows only the five newest UI-created posts while counting all six', async ({ page }) => {
+  await page.goto('/');
+  await login(page, 'admin', 'admin', '/admin');
+  const totalPosts = page.getByRole('region', { name: 'Total Posts', exact: true });
+  await expect(totalPosts).toHaveText('Total Posts0All locally saved posts');
+  const titles = [
+    'Oldest editorial note',
+    'Second editorial note',
+    'Third editorial note',
+    'Fourth editorial note',
+    'Fifth editorial note',
+    'Newest editorial note',
+  ];
+
+  for (const title of titles) {
+    await page.getByRole('link', { name: 'Write New Post', exact: true }).click();
+    await expect(page).toHaveURL('/write');
+    await page.getByLabel('Title').fill(title);
+    await page.getByLabel('Content').fill(`Non-sensitive demo writing for ${title}.`);
+    await page.getByRole('button', { name: 'Publish Post', exact: true }).click();
+    await expect(page).toHaveURL(/\/blog\/[^/]+$/);
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    await dashboard(page);
+  }
+
+  const recent = page.getByRole('region', { name: 'Recent Posts', exact: true });
+  await expect(recent.getByRole('article')).toHaveCount(5);
+  await expect(recent.getByRole('heading', { level: 3 })).toHaveText([...titles].reverse().slice(0, 5));
+  await expect(recent.getByRole('link', { name: titles[0], exact: true })).toHaveCount(0);
+  await expect(totalPosts).toHaveText('Total Posts6All locally saved posts');
+  expect((await records(page)).posts.map((post) => post.title)).toEqual(titles);
+});

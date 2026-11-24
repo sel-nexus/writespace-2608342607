@@ -66,6 +66,34 @@ async function readPosts(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('writespace_posts') ?? '[]'));
 }
 
+test('both list writing CTAs open the editor and cancel drafts without changing storage', async ({ page }) => {
+  await page.goto('/');
+  await registerReader(page, 'ListCtaWriter');
+  await expect(page.getByRole('heading', { name: 'All Blogs', exact: true })).toBeVisible();
+  await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
+  const storedPosts = await page.evaluate(() => localStorage.getItem('writespace_posts'));
+  expect(await readPosts(page)).toEqual([]);
+
+  for (const cta of ['Write New Post', 'Write your first post']) {
+    const link = page.getByRole('main').getByRole('link', { name: cta, exact: true });
+    await expect(link).toBeVisible();
+    await link.click();
+    await expect(page).toHaveURL('/write');
+    await expect(page.getByRole('heading', { name: 'Write a Post', exact: true })).toBeVisible();
+    await expect(page.getByLabel('Title')).toHaveValue('');
+    await expect(page.getByLabel('Content')).toHaveValue('');
+    await expect(page.getByRole('button', { name: 'Publish Post', exact: true })).toBeVisible();
+    await page.getByLabel('Title').fill(`Discarded draft from ${cta}`);
+    await page.getByLabel('Content').fill('Cancel this draft without publishing it.');
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(page).toHaveURL('/blogs');
+    await expect(page.getByRole('heading', { name: 'All Blogs', exact: true })).toBeVisible();
+    await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
+    expect(await readPosts(page)).toEqual([]);
+    expect(await page.evaluate(() => localStorage.getItem('writespace_posts'))).toBe(storedPosts);
+  }
+});
+
 test('register, validate, write, reload, read, edit, cancel delete and delete persisted writing', async ({ page }) => {
   await page.goto('/');
   await registerReader(page, 'PostWriter');

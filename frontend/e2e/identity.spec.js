@@ -82,6 +82,43 @@ test('invalid then valid registration, reload, logout and persisted login journe
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_users')).length)).toBe(1);
 });
 
+for (const role of ['user', 'admin']) {
+  test(`signed-in ${role} follows landing footer auth links back to role home`, async ({ page }) => {
+    await page.goto('/');
+    const home = role === 'admin' ? '/admin' : '/blogs';
+    const displayName = role === 'admin' ? 'Admin' : 'Footer Reader';
+    const footer = page.getByRole('navigation', { name: 'Footer navigation' });
+    if (role === 'user') {
+      await footer.getByRole('link', { name: 'Register', exact: true }).click();
+      await page.getByLabel('Display Name').fill(displayName);
+      await page.getByLabel('Username').fill('footer-reader');
+      await page.getByLabel('Password', { exact: true }).fill('demo-only');
+      await page.getByLabel('Confirm Password').fill('demo-only');
+      await page.getByRole('button', { name: 'Register', exact: true }).click();
+    } else {
+      await footer.getByRole('link', { name: 'Login', exact: true }).click();
+      await page.getByLabel('Username').fill('admin');
+      await page.getByLabel('Password').fill('admin');
+      await page.getByRole('button', { name: 'Login', exact: true }).click();
+    }
+    await expect(page).toHaveURL(home);
+    const session = await page.evaluate(() => localStorage.getItem('writespace_session'));
+    for (const link of ['Login', 'Register']) {
+      await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+      await expect(page).toHaveURL('/');
+      await footer.getByRole('link', { name: link, exact: true }).click();
+      await expect(page).toHaveURL(home);
+      await expect(page.getByLabel('Username', { exact: true })).toHaveCount(0);
+      await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+      await expect(page.getByLabel('Display Name', { exact: true })).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /^(Login|Register)$/ })).toHaveCount(0);
+      await openNavigation(page);
+      await expect(page.getByRole('button', { name: `Account options for ${displayName}`, exact: true })).toBeVisible();
+      expect(await page.evaluate(() => localStorage.getItem('writespace_session'))).toBe(session);
+    }
+  });
+}
+
 test('permanent default admin login and role navigation persist across reload', async ({ page }) => {
   await page.goto('/');
   await openPublicMenu(page);

@@ -152,6 +152,9 @@ export function register(fields = {}) {
     id: globalThis.crypto.randomUUID(), displayName: displayName.trim(), username: name,
     password, role: 'user', createdAt: new Date().toISOString(),
   };
+  if (users.some((user) => user.id === account.id)) {
+    throw new Error('Unable to create a unique account ID. Existing data was not changed. Please try again.');
+  }
   saveUsers([...users, account]);
   try {
     return setSession({ userId: account.id, username: name, displayName: account.displayName, role: 'user' });

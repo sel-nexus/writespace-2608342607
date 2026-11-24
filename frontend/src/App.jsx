@@ -29,6 +29,10 @@ export default function App() {
 
   useEffect(() => {
     refreshSession();
+    const titles = { '/': 'WriteSpace', '/login': 'Login', '/register': 'Register',
+      '/blogs': 'All Blogs', '/write': 'Write', '/admin': 'Dashboard', '/users': 'Users' };
+    const title = titles[location.pathname] ?? (location.pathname.startsWith('/edit/') ? 'Edit Post' : 'Read Post');
+    document.title = title === 'WriteSpace' ? title : `${title} | WriteSpace`;
   }, [location.pathname]);
   useEffect(() => {
     window.addEventListener('storage', refreshSession);
