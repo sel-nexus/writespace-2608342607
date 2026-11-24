@@ -1,6 +1,60 @@
 {
   "nodes": [
     {
+      "id": "changelog",
+      "label": "CHANGELOG.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "changelog_writespace_change_run",
+      "label": "WriteSpace change run",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "changelog_added",
+      "label": "Added",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L3",
+      "_origin": "ast"
+    },
+    {
+      "id": "changelog_modified_files",
+      "label": "Modified files",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L9",
+      "_origin": "ast"
+    },
+    {
+      "id": "changelog_compatibility_and_migration",
+      "label": "Compatibility and migration",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L16",
+      "_origin": "ast"
+    },
+    {
+      "id": "changelog_verification_and_retained_limitations",
+      "label": "Verification and retained limitations",
+      "file_type": "document",
+      "node_kind": "heading",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L19",
+      "_origin": "ast"
+    },
+    {
       "id": "frontend_e2e_admin_theme_spec",
       "label": "admin-theme.spec.js",
       "file_type": "code",
@@ -288,6 +342,24 @@
       "file_type": "code",
       "source_file": "frontend/e2e/theme.spec.js",
       "source_location": "L18",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "frontend_e2e_theme_spec_expectnavbartheme",
+      "label": "expectNavbarTheme()",
+      "file_type": "code",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L28",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "frontend_e2e_theme_spec_expectauththeme",
+      "label": "expectAuthTheme()",
+      "file_type": "code",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L38",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2173,7 +2245,7 @@
       "label": "describe()",
       "file_type": "code",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L33",
+      "source_location": "L35",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2182,7 +2254,7 @@
       "label": "createLocalRecords()",
       "file_type": "code",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L70",
+      "source_location": "L72",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2191,7 +2263,7 @@
       "label": "main()",
       "file_type": "code",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L114",
+      "source_location": "L116",
       "_callable": true,
       "_origin": "ast"
     },
@@ -2233,6 +2305,56 @@
     }
   ],
   "links": [
+    {
+      "source": "changelog",
+      "target": "changelog_writespace_change_run",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "changelog_writespace_change_run",
+      "target": "changelog_added",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "changelog_writespace_change_run",
+      "target": "changelog_modified_files",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "changelog_writespace_change_run",
+      "target": "changelog_compatibility_and_migration",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "changelog_writespace_change_run",
+      "target": "changelog_verification_and_retained_limitations",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CHANGELOG.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
     {
       "source": "frontend_e2e_admin_theme_spec",
       "target": "frontend_e2e_fixtures",
@@ -2958,12 +3080,54 @@
     },
     {
       "source": "frontend_e2e_theme_spec",
+      "target": "frontend_e2e_theme_spec_expectnavbartheme",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "frontend_e2e_theme_spec",
+      "target": "frontend_e2e_theme_spec_expectauththeme",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L38",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "frontend_e2e_theme_spec_expectnavbartheme",
       "target": "frontend_e2e_theme_spec_expecttheme",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/e2e/theme.spec.js",
-      "source_location": "L36",
+      "source_location": "L29",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "frontend_e2e_theme_spec_expectauththeme",
+      "target": "frontend_e2e_theme_spec_expecttheme",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "frontend_e2e_theme_spec",
+      "target": "frontend_e2e_theme_spec_expectnavbartheme",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -2974,7 +3138,18 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/e2e/theme.spec.js",
-      "source_location": "L45",
+      "source_location": "L80",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "frontend_e2e_theme_spec",
+      "target": "frontend_e2e_theme_spec_expectauththeme",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/e2e/theme.spec.js",
+      "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9572,7 +9747,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L33",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9582,7 +9757,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L70",
+      "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9592,7 +9767,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L114",
+      "source_location": "L116",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9603,7 +9778,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L54",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9614,7 +9789,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L122",
+      "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9625,7 +9800,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/visual-preflight.js",
-      "source_location": "L123",
+      "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9965,7 +10140,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/components/Navbar.jsx",
-      "source_location": "L113",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10773,7 +10948,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/Navbar.jsx",
-      "source_location": "L63",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -10785,7 +10960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/Navbar.jsx",
-      "source_location": "L102",
+      "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -11259,10 +11434,10 @@
     }
   ],
   "metadata": {
-    "built_at": "2026-11-24T11:58:05.238521+00:00",
+    "built_at": "2026-11-24T12:13:59.421526+00:00",
     "version": "graph_update-v1",
     "codebase_root": "/var/lib/sel-nexus/artifacts-v2/T98digiai0000466124112611361878/developer",
     "force": true,
-    "files_scanned": 60
+    "files_scanned": 61
   }
 }
