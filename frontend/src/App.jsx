@@ -7,6 +7,10 @@ import RegisterPage from './pages/RegisterPage';
 import { getSession } from './utils/auth';
 import { PublicNavbar } from './components/PublicNavbar';
 import LandingPage from './pages/LandingPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import Home from './pages/Home';
+import ReadBlog from './pages/ReadBlog';
+import WriteBlog from './pages/WriteBlog';
 
 /** Render completed routes and choose their session-aware header.
  * Returns:
@@ -54,6 +58,12 @@ export default function App() {
         />
         <Route path="/login" element={<LoginPage onSessionChange={refreshSession} />} />
         <Route path="/register" element={<RegisterPage onSessionChange={refreshSession} />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/blogs" element={<Home />} />
+          <Route path="/blog/:id" element={<ReadBlog />} />
+          <Route path="/write" element={<WriteBlog />} />
+          <Route path="/edit/:id" element={<WriteBlog />} />
+        </Route>
       </Routes>
     </div>
   );
