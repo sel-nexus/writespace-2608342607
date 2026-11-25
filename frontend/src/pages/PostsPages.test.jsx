@@ -26,6 +26,12 @@ function fill(title = 'Title', content = 'First\n\n  Second  ') {
   fireEvent.change(screen.getByLabelText('Title'), { target: { value: title } });
   fireEvent.change(screen.getByLabelText('Content'), { target: { value: content } });
 }
+/** Reject numeric-only dark offset tokens on every rendered post control. */
+function expectValidPostFocusOffsets() {
+  const classes = [...screen.getByRole('main').querySelectorAll('[class]')]
+    .flatMap((element) => [...element.classList]);
+  expect(classes.filter((token) => /^dark:focus(?:-visible)?:ring-offset-\d+$/.test(token))).toEqual([]);
+}
 it.each(['user', 'admin'])('shows empty collection and write CTA to %s', async (role) => {
   if (role === 'admin') authenticate('admin', 'admin');
   else reader();
@@ -315,20 +321,52 @@ it('pairs dark collection cards reader metadata and editor surfaces through real
   const card = screen.getByRole('article');
   expect(card).toHaveClass('bg-white', 'dark:bg-slate-900');
   expect(card.querySelector('time')).toHaveClass('dark:text-slate-300');
+  expect(screen.getByRole('link', { name: 'Write New Post' })).toHaveClass('dark:focus-visible:ring-offset-slate-950');
+  expect(screen.getByRole('link', { name: post.title })).toHaveClass('dark:focus-visible:ring-offset-slate-900');
+  expect(screen.getByRole('link', { name: `Edit ${post.title}` })).toHaveClass('dark:focus-visible:ring-offset-slate-900');
+  expectValidPostFocusOffsets();
   await user.click(screen.getByRole('link', { name: post.title }));
   expect(screen.getByRole('main')).toHaveClass('dark:text-slate-100');
   expect(screen.getByRole('article').querySelector('time')).toHaveClass('dark:text-slate-300');
-  expect(screen.getByRole('button', { name: 'Delete' })).toHaveClass('dark:bg-red-950', 'dark:text-red-300', 'dark:focus-visible:ring-offset-950');
+  expect(screen.getByRole('button', { name: 'Delete' })).toHaveClass(
+    'dark:bg-red-950', 'dark:text-red-300', 'dark:focus-visible:ring-offset-slate-950',
+  );
+  for (const name of ['Back to All Posts', 'Edit']) {
+    expect(screen.getByRole('link', { name, exact: true })).toHaveClass('dark:focus-visible:ring-offset-slate-950');
+  }
+  expectValidPostFocusOffsets();
   await user.click(screen.getByRole('link', { name: 'Edit', exact: true }));
   expect(screen.getByLabelText('Content').closest('form')).toHaveClass('bg-white', 'dark:bg-slate-900');
-  expect(screen.getByLabelText('Content')).toHaveClass('dark:text-slate-100', 'dark:focus:ring-offset-900');
+  expect(screen.getByLabelText('Content')).toHaveClass('dark:text-slate-100', 'dark:focus:ring-offset-slate-900');
+  expect(screen.getByLabelText('Title')).toHaveClass('dark:focus:ring-offset-slate-900');
+  for (const name of ['Save Changes', 'Cancel']) {
+    expect(screen.getByRole('button', { name })).toHaveClass('dark:focus-visible:ring-offset-slate-900');
+  }
+  expectValidPostFocusOffsets();
   expect(screen.getByRole('status')).toHaveClass('dark:text-slate-300');
+});
+it('uses valid dark focus offsets for create fields and actions', () => {
+  reader();
+  localStorage.setItem('writespace_theme', 'dark');
+  setup('/write');
+  for (const label of ['Title', 'Content']) {
+    expect(screen.getByLabelText(label)).toHaveClass('dark:focus:ring-offset-slate-900');
+  }
+  for (const name of ['Publish Post', 'Cancel']) {
+    expect(screen.getByRole('button', { name })).toHaveClass('dark:focus-visible:ring-offset-slate-900');
+  }
+  expectValidPostFocusOffsets();
 });
 it.each(['/blog/missing', '/edit/missing'])('keeps dark missing state and collection empty state readable at %s', async (path) => {
   reader();
   localStorage.setItem('writespace_theme', 'dark');
   const user = setup(path);
   expect(screen.getByRole('main')).toHaveClass('dark:text-slate-100');
+  expect(screen.getByRole('link', { name: 'Back to All Posts' })).toHaveClass('dark:focus-visible:ring-offset-slate-950');
+  expectValidPostFocusOffsets();
   await user.click(screen.getByRole('link', { name: 'Back to All Posts' }));
   expect(screen.getByText('No blogs yet. Be the first to write one!').closest('section')).toHaveClass('dark:bg-slate-900');
+  expect(screen.getByRole('link', { name: 'Write New Post' })).toHaveClass('dark:focus-visible:ring-offset-slate-950');
+  expect(screen.getByRole('link', { name: 'Write your first post' })).toHaveClass('dark:focus-visible:ring-offset-slate-900');
+  expectValidPostFocusOffsets();
 });

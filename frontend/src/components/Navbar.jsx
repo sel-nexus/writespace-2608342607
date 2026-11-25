@@ -53,7 +53,11 @@ export function Navbar({ session, onSessionChange, theme = 'light', onToggleThem
   const links = [['/blogs', 'All Blogs'], ['/write', 'Write']];
   if (session.role === 'admin') links.push(['/users', 'Users']);
   return (
-    <header onKeyDown={handleEscape} className="sticky top-0 z-20 border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+    <header
+      onKeyDown={handleEscape}
+      className={'sticky top-0 z-20 border-b border-slate-100 dark:border-slate-700 '
+        + 'bg-white dark:bg-slate-800 shadow-sm'}
+    >
       <nav
         aria-label="Authenticated navigation"
         className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6"
@@ -99,7 +103,8 @@ export function Navbar({ session, onSessionChange, theme = 'light', onToggleThem
               aria-expanded={accountOpen}
               aria-controls="account-options"
               onClick={() => setAccountOpen(!accountOpen)}
-              className={`${focus} flex max-w-full items-center gap-2 px-3 py-2 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700`}
+              className={`${focus} flex max-w-full items-center gap-2 px-3 py-2 text-slate-800 `
+                + 'dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700'}
             >
               <Avatar role={session.role} />
               <span className="max-w-40 truncate font-medium">{session.displayName}</span>

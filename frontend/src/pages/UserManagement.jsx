@@ -58,17 +58,34 @@ export default function UserManagement() {
   if (!error && !session) return <Navigate to="/login" replace />;
   if (!error && session.role !== 'admin') return <Navigate to="/blogs" replace />;
   return (
-    <main id="main-content" className="min-h-[calc(100dvh-64px)] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-10 sm:px-6">
+    <main
+      id="main-content"
+      className="min-h-[calc(100dvh-64px)] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-10 sm:px-6"
+    >
       <div className="mx-auto max-w-6xl">
-        <Link to="/admin" className="rounded text-orange-800 dark:text-orange-300 focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-950">Back to Dashboard</Link>
+        <Link
+          to="/admin"
+          className="rounded text-orange-800 dark:text-orange-300 focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-950"
+        >
+          Back to Dashboard
+        </Link>
         <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-orange-800 dark:text-orange-300">People behind the words</p>
         <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight sm:text-5xl">User Management</h1>
         <p className="mt-4 max-w-2xl leading-relaxed text-slate-600 dark:text-slate-300">
           Local accounts for this browser only. Deleting an account retains its posts and author name.
         </p>
-        <form onSubmit={submit} noValidate className="mt-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8">
+        <form
+          onSubmit={submit}
+          noValidate
+          className="mt-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8"
+        >
           <h2 className="font-serif text-2xl font-bold">Create User</h2>
-          <p id="demo-password-warning" className="mt-2 text-sm text-slate-600 dark:text-slate-300">Passwords are plaintext demo data. Never use real passwords.</p>
+          <p
+            id="demo-password-warning"
+            className="mt-2 text-sm text-slate-600 dark:text-slate-300"
+          >
+            Passwords are plaintext demo data. Never use real passwords.
+          </p>
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             {['displayName', 'username', 'password'].map((key) => (
               <div key={key}>

@@ -63,6 +63,7 @@ async function records(page) {
 for (const theme of ['light', 'dark']) {
   test(`admin creates both roles, protects current/default, retains author posts and manages recent writing persistently in ${theme}`, async ({ page }) => {
     await page.goto('/');
+    await navigation(page, true);
     if (theme === 'dark') await page.getByRole('button', { name: /switch to dark mode/i }).click();
     await login(page, 'admin', 'admin', '/admin');
     await expect(page.locator('html')).toHaveClass(theme === 'dark' ? /dark/ : /^(?!.*dark)/);

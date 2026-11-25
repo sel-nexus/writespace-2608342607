@@ -24,7 +24,7 @@ export default function Home() {
           <Link
             to="/write"
             className={'rounded-full bg-orange-800 dark:bg-orange-700 px-6 py-3 text-center font-semibold text-white hover:bg-orange-900 dark:hover:bg-orange-800 '
-              + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-950'}
+              + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950'}
           >
             Write New Post
           </Link>
@@ -34,7 +34,9 @@ export default function Home() {
             <span aria-hidden="true" className="mb-6 block h-2 w-12 rounded-full bg-amber-400" />
             <h2 className="font-serif text-2xl font-bold">No blogs yet. Be the first to write one!</h2>
             <p className="mt-3 text-slate-600 dark:text-slate-300">Your next idea starts with a blank page.</p>
-            <Link to="/write" className="mt-6 inline-block rounded-lg p-2 font-semibold text-orange-800 dark:text-orange-300 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-900">
+            <Link
+              to="/write" className="mt-6 inline-block rounded-lg p-2 font-semibold text-orange-800 dark:text-orange-300 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+            >
               Write your first post
             </Link>
           </section>

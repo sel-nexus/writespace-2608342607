@@ -66,6 +66,18 @@ async function readPosts(page) {
   return page.evaluate(() => JSON.parse(localStorage.getItem('writespace_posts') ?? '[]'));
 }
 
+/** Verify generated dark offset CSS after entering a control by keyboard. */
+async function expectKeyboardRingOffset(page, control, color) {
+  await control.focus();
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect(control).toBeFocused();
+  expect(await control.evaluate((element) => element.matches(':focus-visible'))).toBe(true);
+  await expect.poll(() => control.evaluate((element) =>
+    getComputedStyle(element).getPropertyValue('--tw-ring-offset-color').trim(),
+  )).toBe(color);
+}
+
 test('both list writing CTAs open the editor and cancel drafts without changing storage', async ({ page }) => {
   await page.goto('/');
   await registerReader(page, 'ListCtaWriter');
@@ -108,6 +120,12 @@ for (const theme of ['light', 'dark']) {
     await openWriter(page);
     const counter = page.getByRole('status');
     const textarea = page.getByLabel('Content');
+    if (theme === 'dark') {
+      for (const control of [page.getByLabel('Title'), textarea,
+        page.getByRole('button', { name: 'Publish Post' }), page.getByRole('button', { name: 'Cancel' })]) {
+        await expectKeyboardRingOffset(page, control, '#0f172a');
+      }
+    }
     await expect(counter).toHaveText('0 characters');
     await expect(textarea).not.toHaveAttribute('maxlength', /.+/);
     await textarea.pressSequentially('Draft');
@@ -140,12 +158,25 @@ for (const theme of ['light', 'dark']) {
       await expect(page.locator('html')).toHaveClass(/dark/);
       expect(await page.evaluate(() => localStorage.getItem('writespace_theme'))).toBe('dark');
       await expect(page.getByRole('main')).toHaveCSS('color', 'rgb(241, 245, 249)');
+      for (const control of [page.getByRole('link', { name: 'Back to All Posts' }),
+        page.getByRole('link', { name: 'Edit', exact: true }), page.getByRole('button', { name: 'Delete' })]) {
+        await expectKeyboardRingOffset(page, control, '#020617');
+      }
     }
     await page.getByRole('link', { name: 'Back to All Posts' }).click();
+    if (theme === 'dark') {
+      await expectKeyboardRingOffset(page, page.getByRole('link', { name: 'Write New Post' }), '#020617');
+      await expectKeyboardRingOffset(page, page.getByRole('link', { name: saved.title, exact: true }), '#0f172a');
+      await expectKeyboardRingOffset(page, page.getByRole('link', { name: `Edit ${saved.title}` }), '#0f172a');
+    }
     await page.getByRole('link', { name: saved.title, exact: true }).click();
     await page.getByRole('link', { name: 'Edit', exact: true }).click();
     await expect(page.getByLabel('Title')).toHaveValue(saved.title);
     await expect(page.getByLabel('Content')).toHaveValue(content);
+    if (theme === 'dark') {
+      await expectKeyboardRingOffset(page, textarea, '#0f172a');
+      await expectKeyboardRingOffset(page, page.getByRole('button', { name: 'Save Changes' }), '#0f172a');
+    }
     await expect(counter).toHaveText(`${content.length} characters`);
     await textarea.press('End');
     await textarea.pressSequentially('abc');
@@ -189,6 +220,7 @@ for (const theme of ['light', 'dark']) {
     if (theme === 'dark') {
       await expect(page.getByRole('main')).toHaveCSS('background-color', 'rgb(2, 6, 23)');
       await expect(page.locator('html')).toHaveClass(/dark/);
+      await expectKeyboardRingOffset(page, page.getByRole('link', { name: 'Write your first post' }), '#0f172a');
     }
   });
 }

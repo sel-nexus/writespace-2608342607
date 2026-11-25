@@ -32,7 +32,9 @@ export default function ReadBlog() {
   if (!session && !error) return <Navigate to="/login" replace />;
   return (
     <main id="main-content" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 text-slate-900 dark:text-slate-100">
-      <Link to="/blogs" className="rounded-lg p-2 text-slate-600 dark:text-slate-300 hover:text-orange-800 dark:hover:text-orange-200 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-950">
+      <Link
+        to="/blogs" className="rounded-lg p-2 text-slate-600 dark:text-slate-300 hover:text-orange-800 dark:hover:text-orange-200 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+      >
         Back to All Posts
       </Link>
       {!post ? (
@@ -57,14 +59,14 @@ export default function ReadBlog() {
             <div className="mt-10 flex flex-wrap gap-3 border-t border-slate-200 dark:border-slate-700 pt-6">
               <Link
                 to={`/edit/${id}`}
-                className="rounded-lg border border-indigo-200 dark:border-indigo-700 px-4 py-2 font-medium text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-950"
+                className="rounded-lg border border-indigo-200 dark:border-indigo-700 px-4 py-2 font-medium text-indigo-600 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
               >
                 Edit
               </Link>
               <button
                 type="button"
                 onClick={removePost}
-                className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-2 font-medium text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-950"
+                className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 px-4 py-2 font-medium text-red-600 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
               >
                 Delete
               </button>

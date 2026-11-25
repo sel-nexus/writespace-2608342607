@@ -51,9 +51,22 @@ export default function RegisterPage({ onSessionChange }) {
 
   if (session) return <Navigate to={roleHome(session.role)} replace />;
   return (
-    <main id="main-content" className="flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950 dark:text-slate-100">
-      <section aria-labelledby="auth-title" className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
-        <Link to="/" aria-label="WriteSpace home" className="rounded-lg font-serif text-2xl font-bold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:text-slate-100 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-900">
+    <main
+      id="main-content"
+      className={'flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-12 '
+        + 'dark:bg-slate-950 dark:text-slate-100'}
+    >
+      <section
+        aria-labelledby="auth-title"
+        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900"
+      >
+        <Link
+          to="/"
+          aria-label="WriteSpace home"
+          className={'rounded-lg font-serif text-2xl font-bold text-slate-900 focus-visible:outline-none '
+            + 'focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 '
+            + 'dark:text-slate-100 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-900'}
+        >
           WriteSpace
           <span className="text-orange-800 dark:text-orange-400">.</span>
         </Link>
@@ -147,7 +160,13 @@ export default function RegisterPage({ onSessionChange }) {
         </form>
         <p className="mt-6 text-sm text-slate-600 dark:text-slate-300">
           Already have an account?
-          <Link to="/login" className="ml-2 rounded-sm font-semibold text-orange-800 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:text-orange-400 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-900">
+          <Link
+            to="/login"
+            className={'ml-2 rounded-sm font-semibold text-orange-800 underline focus-visible:outline-none '
+              + 'focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 '
+              + 'dark:text-orange-400 dark:focus-visible:ring-orange-400 '
+              + 'dark:focus-visible:ring-offset-slate-900'}
+          >
             Login
           </Link>
         </p>

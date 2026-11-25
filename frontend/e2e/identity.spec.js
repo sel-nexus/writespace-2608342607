@@ -29,11 +29,11 @@ async function logout(page, displayName) {
 for (const theme of ['light', 'dark']) {
   test(`invalid then valid registration, reload, logout and persisted login journey in ${theme} mode`, async ({ page }) => {
     await page.goto('/');
+    await openPublicMenu(page);
     if (theme === 'dark') {
       await page.getByRole('button', { name: 'Switch to dark mode', exact: true }).click();
     }
     await expect(page.locator('html')).toHaveClass(theme === 'dark' ? /dark/ : /^$/);
-    await openPublicMenu(page);
     await page.getByRole('link', { name: 'Get Started', exact: true }).click();
     await page.getByRole('button', { name: 'Register', exact: true }).click();
     await expect(page.getByLabel('Display Name')).toHaveAttribute('aria-invalid', 'true');
