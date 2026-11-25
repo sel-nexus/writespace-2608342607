@@ -2,15 +2,19 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import App from '../App';
 import { authenticate, clearSession, getSession, register } from '../utils/auth';
 import { getUsers } from '../utils/storage';
 
-/** Provide isolated forms and observable test-only role homes. */
-function setup(path = '/login') {
+/** Restore the shared theme marker after isolated form and App cases. */
+afterEach(() => document.documentElement.classList.remove('dark'));
+
+/** Provide isolated forms and observable test-only role homes in either theme. */
+function setup(path = '/login', theme = 'light') {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
   render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
@@ -31,25 +35,30 @@ async function fillRegistration(user, username = 'reader', confirmation = 'demo'
   await user.type(screen.getByLabelText('Password', { exact: true }), 'demo');
   await user.type(screen.getByLabelText('Confirm Password'), confirmation);
 }
-it.each(['/login', '/register'])('requires all fields accessibly at %s', async (path) => {
-  const user = setup(path);
-  await user.click(screen.getByRole('button', { name: path === '/login' ? 'Login' : 'Register' }));
-  const inputs = screen.getAllByLabelText(/Display Name|Username|Password/);
-  for (const input of inputs) {
-    expect(input).toBeRequired();
-    expect(input).toHaveAttribute('aria-required', 'true');
-    expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(input).toHaveAccessibleDescription('This field is required.');
-  }
-  expect(getSession()).toBeNull();
-  expect(getUsers()).toEqual([]);
-});
-it('shows exact invalid credentials error with field association', async () => {
-  const user = setup();
+it.each([['/login', 'light'], ['/login', 'dark'], ['/register', 'light'], ['/register', 'dark']])(
+  'requires all fields accessibly at %s in %s mode', async (path, theme) => {
+    const user = setup(path, theme);
+    await user.click(screen.getByRole('button', { name: path === '/login' ? 'Login' : 'Register' }));
+    const inputs = screen.getAllByLabelText(/Display Name|Username|Password/);
+    for (const input of inputs) {
+      expect(input).toBeRequired();
+      expect(input).toHaveAttribute('aria-required', 'true');
+      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(input).toHaveAccessibleDescription('This field is required.');
+      expect(document.getElementById(input.getAttribute('aria-describedby')))
+        .toHaveClass('text-red-700', 'dark:text-red-300');
+    }
+    expect(getSession()).toBeNull();
+    expect(getUsers()).toEqual([]);
+  },
+);
+it.each(['light', 'dark'])('shows exact invalid credentials error with field association in %s mode', async (theme) => {
+  const user = setup('/login', theme);
   await user.type(screen.getByLabelText('Username'), 'admin');
   await user.type(screen.getByLabelText('Password'), 'wrong');
   await user.click(screen.getByRole('button', { name: 'Login' }));
   expect(screen.getByRole('alert')).toHaveTextContent('Invalid username or password.');
+  expect(screen.getByRole('alert')).toHaveClass('bg-red-50', 'text-red-700', 'dark:bg-red-950', 'dark:text-red-300');
   expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('Invalid username or password.');
   expect(getSession()).toBeNull();
 });
@@ -123,11 +132,12 @@ it.each([
   expect(within(accountButton).getByText(displayName, { exact: true }).textContent).toBe(displayName);
   expect(container.querySelector('script, img[src="x"], [onerror]')).toBeNull();
 });
-it('associates mismatch errors and saves nothing', async () => {
-  const user = setup('/register');
+it.each(['light', 'dark'])('associates mismatch errors and saves nothing in %s mode', async (theme) => {
+  const user = setup('/register', theme);
   await fillRegistration(user, 'reader', 'wrong');
   await user.click(screen.getByRole('button', { name: 'Register' }));
   expect(screen.getByLabelText('Confirm Password')).toHaveAccessibleDescription('Passwords must match.');
+  expect(screen.getByRole('alert')).toHaveClass('text-red-700', 'dark:text-red-300');
   expect(getUsers()).toEqual([]);
   expect(getSession()).toBeNull();
 });
@@ -154,8 +164,8 @@ it.each(['/login', '/register'])('redirects signed-in users away from %s', (path
   setup(path);
   expect(screen.getByRole('heading')).toHaveTextContent('Reader home');
 });
-it('leaves login visible when session storage fails', async () => {
-  const user = setup();
+it.each(['light', 'dark'])('leaves login visible when session storage fails in %s mode', async (theme) => {
+  const user = setup('/login', theme);
   vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('full'); });
   await user.type(screen.getByLabelText('Username'), 'admin');
   await user.type(screen.getByLabelText('Password'), 'admin');
@@ -164,8 +174,8 @@ it('leaves login visible when session storage fails', async () => {
   expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
   expect(getSession()).toBeNull();
 });
-it('retains form and no account on failed account write', async () => {
-  const user = setup('/register');
+it.each(['light', 'dark'])('retains form and no account on failed account write in %s mode', async (theme) => {
+  const user = setup('/register', theme);
   vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('full'); });
   await fillRegistration(user);
   await user.click(screen.getByRole('button', { name: 'Register' }));
@@ -220,3 +230,46 @@ it('propagates persisted identity to the landing header and reading CTA in App',
   expect(screen.getByRole('link', { name: 'Start Reading' })).toHaveAttribute('href', '/blogs');
   expect(within(screen.getByRole('navigation', { name: 'Public navigation' })).getByText('Admin')).toBeInTheDocument();
 });
+
+it.each([['/login', 'light'], ['/login', 'dark'], ['/register', 'light'], ['/register', 'dark']])(
+  'provides paired surfaces, editable fields and keyboard links at %s in %s mode', async (path, theme) => {
+    const user = setup(path, theme);
+    expect(document.documentElement.classList.contains('dark')).toBe(theme === 'dark');
+    expect(screen.getByRole('main')).toHaveClass('bg-slate-50', 'dark:bg-slate-950');
+    expect(screen.getByRole('region')).toHaveClass('bg-white', 'dark:bg-slate-900', 'dark:border-slate-800');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveClass('text-slate-900', 'dark:text-slate-100');
+    expect(screen.getByText(/Browser-local demo only/)).toHaveClass('text-slate-600', 'dark:text-slate-300');
+    const home = screen.getByRole('link', { name: 'WriteSpace home' });
+    await user.tab();
+    expect(home).toHaveFocus();
+    expect(home).toHaveClass('dark:text-slate-100', 'focus-visible:ring-offset-2', 'dark:focus-visible:ring-offset-slate-900');
+    const fields = screen.getAllByLabelText(/Display Name|Username|Password/);
+    for (const field of fields) {
+      await user.tab();
+      expect(field).toHaveFocus();
+      expect(field).toHaveClass('bg-white', 'text-slate-900', 'dark:bg-slate-950', 'dark:text-slate-100',
+        'dark:border-slate-700', 'dark:focus:ring-orange-400', 'dark:focus:ring-offset-slate-900');
+      expect(document.querySelector(`label[for="${field.id}"]`)).toHaveClass('text-slate-800', 'dark:text-slate-200');
+      await user.type(field, 'demo');
+      expect(field).toHaveValue('demo');
+      expect(field).toHaveAttribute('aria-invalid', 'false');
+    }
+    await user.tab();
+    const submit = screen.getByRole('button', { name: path === '/login' ? 'Login' : 'Register' });
+    expect(submit).toHaveFocus();
+    expect(submit).toHaveClass('bg-orange-800', 'text-white', 'dark:focus-visible:ring-orange-400',
+      'dark:focus-visible:ring-offset-slate-900');
+    await user.tab();
+    const link = screen.getByRole('link', { name: path === '/login' ? 'Register' : 'Login' });
+    expect(link).toHaveFocus();
+    expect(link).toHaveClass('text-orange-800', 'dark:text-orange-400', 'focus-visible:ring-offset-2',
+      'dark:focus-visible:ring-offset-slate-900');
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      path === '/login' ? 'Make room to write.' : 'Welcome back.',
+    );
+    expect(document.documentElement.classList.contains('dark')).toBe(theme === 'dark');
+    expect(getSession()).toBeNull();
+    expect(getUsers()).toEqual([]);
+  },
+);
