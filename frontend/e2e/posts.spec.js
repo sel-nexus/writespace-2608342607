@@ -82,6 +82,7 @@ test('both list writing CTAs open the editor and cancel drafts without changing 
     await expect(page.getByRole('heading', { name: 'Write a Post', exact: true })).toBeVisible();
     await expect(page.getByLabel('Title')).toHaveValue('');
     await expect(page.getByLabel('Content')).toHaveValue('');
+    await expect(page.getByRole('status')).toHaveText('0 characters');
     await expect(page.getByRole('button', { name: 'Publish Post', exact: true })).toBeVisible();
     await page.getByLabel('Title').fill(`Discarded draft from ${cta}`);
     await page.getByLabel('Content').fill('Cancel this draft without publishing it.');
@@ -94,64 +95,103 @@ test('both list writing CTAs open the editor and cancel drafts without changing 
   }
 });
 
-test('register, validate, write, reload, read, edit, cancel delete and delete persisted writing', async ({ page }) => {
-  await page.goto('/');
-  await registerReader(page, 'PostWriter');
-  await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
-  await openWriter(page);
-  await page.getByRole('button', { name: 'Publish Post' }).click();
-  await expect(page.getByLabel('Title')).toHaveAttribute('aria-invalid', 'true');
-  await expect(page.getByLabel('Content')).toHaveAttribute('aria-invalid', 'true');
-  expect(await readPosts(page)).toEqual([]);
-  const content = 'First line\n\n  Keep these spaces  \n<script>alert("plain text")</script>';
-  await page.getByLabel('Title').fill('A local thought');
-  await page.getByLabel('Content').fill(content);
-  await expect(page.getByText(`${content.length} characters`, { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Publish Post' }).click();
-  const saved = (await readPosts(page))[0];
-  await expect(page).toHaveURL(`/blog/${saved.id}`);
-  expect(saved).toMatchObject({ title: 'A local thought', content, authorName: 'PostWriter' });
-  expect(saved.authorId).toBe(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')).userId));
-  expect(saved.id).toMatch(/^[0-9a-f-]{36}$/);
-  expect(new Date(saved.createdAt).toISOString()).toBe(saved.createdAt);
-  await page.reload();
-  await expect(page.getByRole('heading', { name: saved.title })).toBeVisible();
-  expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(content);
-  await expect(page.locator('article script')).toHaveCount(0);
-  expect(await readPosts(page)).toEqual([saved]);
-  await page.getByRole('link', { name: 'Back to All Posts' }).click();
-  await page.getByRole('link', { name: saved.title, exact: true }).click();
-  await page.getByRole('link', { name: 'Edit', exact: true }).click();
-  await expect(page.getByLabel('Title')).toHaveValue(saved.title);
-  await expect(page.getByLabel('Content')).toHaveValue(content);
-  await page.getByLabel('Title').fill('Discarded title');
-  await page.getByRole('button', { name: 'Cancel' }).click();
-  await expect(page).toHaveURL(`/blog/${saved.id}`);
-  expect(await readPosts(page)).toEqual([saved]);
-  await page.getByRole('link', { name: 'Edit', exact: true }).click();
-  await page.getByLabel('Title').fill('An edited thought');
-  await page.getByLabel('Content').fill('Edited\n\n  whitespace retained  ');
-  await page.getByRole('button', { name: 'Save Changes' }).click();
-  const updated = { ...saved, title: 'An edited thought', content: 'Edited\n\n  whitespace retained  ' };
-  await expect(page).toHaveURL(`/blog/${saved.id}`);
-  expect(await readPosts(page)).toEqual([updated]);
-  await page.reload();
-  await expect(page.getByRole('heading', { name: updated.title })).toBeVisible();
-  expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(updated.content);
-  page.once('dialog', async (dialog) => {
-    expect(dialog.type()).toBe('confirm');
-    await dialog.dismiss();
+for (const theme of ['light', 'dark']) {
+  test(`register, validate, write, reload, read, edit, cancel delete and delete persisted writing in ${theme}`, async ({ page }) => {
+    await page.goto('/');
+    await registerReader(page, 'PostWriter');
+    if (theme === 'dark') {
+      await openNavigation(page);
+      await page.getByRole('button', { name: 'Switch to dark mode', exact: true }).click();
+      await expect(page.locator('html')).toHaveClass(/dark/);
+    }
+    await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
+    await openWriter(page);
+    const counter = page.getByRole('status');
+    const textarea = page.getByLabel('Content');
+    await expect(counter).toHaveText('0 characters');
+    await expect(textarea).not.toHaveAttribute('maxlength', /.+/);
+    await textarea.pressSequentially('Draft');
+    await expect(counter).toHaveText('5 characters');
+    await textarea.press('Backspace');
+    await expect(counter).toHaveText('4 characters');
+    await textarea.fill('');
+    await expect(counter).toHaveText('0 characters');
+    await page.getByRole('button', { name: 'Publish Post' }).click();
+    await expect(page.getByLabel('Title')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel('Content')).toHaveAttribute('aria-invalid', 'true');
+    expect(await readPosts(page)).toEqual([]);
+    const content = 'First line\n\n  Keep these spaces  \n<script>alert("plain text")</script>';
+    await page.getByLabel('Title').fill('A local thought');
+    await page.getByLabel('Content').fill(content);
+    await expect(page.getByText(`${content.length} characters`, { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Publish Post' }).click();
+    const saved = (await readPosts(page))[0];
+    await expect(page).toHaveURL(`/blog/${saved.id}`);
+    expect(saved).toMatchObject({ title: 'A local thought', content, authorName: 'PostWriter' });
+    expect(saved.authorId).toBe(await page.evaluate(() => JSON.parse(localStorage.getItem('writespace_session')).userId));
+    expect(saved.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(new Date(saved.createdAt).toISOString()).toBe(saved.createdAt);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: saved.title })).toBeVisible();
+    expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(content);
+    await expect(page.locator('article script')).toHaveCount(0);
+    expect(await readPosts(page)).toEqual([saved]);
+    if (theme === 'dark') {
+      await expect(page.locator('html')).toHaveClass(/dark/);
+      expect(await page.evaluate(() => localStorage.getItem('writespace_theme'))).toBe('dark');
+      await expect(page.getByRole('main')).toHaveCSS('color', 'rgb(241, 245, 249)');
+    }
+    await page.getByRole('link', { name: 'Back to All Posts' }).click();
+    await page.getByRole('link', { name: saved.title, exact: true }).click();
+    await page.getByRole('link', { name: 'Edit', exact: true }).click();
+    await expect(page.getByLabel('Title')).toHaveValue(saved.title);
+    await expect(page.getByLabel('Content')).toHaveValue(content);
+    await expect(counter).toHaveText(`${content.length} characters`);
+    await textarea.press('End');
+    await textarea.pressSequentially('abc');
+    await expect(counter).toHaveText(`${content.length + 3} characters`);
+    await textarea.press('Backspace');
+    await expect(counter).toHaveText(`${content.length + 2} characters`);
+    await textarea.fill('');
+    await expect(counter).toHaveText('0 characters');
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(textarea).toHaveAttribute('aria-invalid', 'true');
+    expect(await readPosts(page)).toEqual([saved]);
+    await page.getByLabel('Title').fill('Discarded title');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page).toHaveURL(`/blog/${saved.id}`);
+    expect(await readPosts(page)).toEqual([saved]);
+    await page.getByRole('link', { name: 'Edit', exact: true }).click();
+    await page.getByLabel('Title').fill('An edited thought');
+    await expect(counter).toHaveText(`${content.length} characters`);
+    await page.getByLabel('Content').fill('Edited\n\n  whitespace retained  ');
+    await expect(counter).toHaveText(`${'Edited\n\n  whitespace retained  '.length} characters`);
+    await page.getByRole('button', { name: 'Save Changes' }).click();
+    const updated = { ...saved, title: 'An edited thought', content: 'Edited\n\n  whitespace retained  ' };
+    await expect(page).toHaveURL(`/blog/${saved.id}`);
+    expect(await readPosts(page)).toEqual([updated]);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: updated.title })).toBeVisible();
+    expect(await page.locator('article p.whitespace-pre-wrap').textContent()).toBe(updated.content);
+    page.once('dialog', async (dialog) => {
+      expect(dialog.type()).toBe('confirm');
+      await dialog.dismiss();
+    });
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(page).toHaveURL(`/blog/${saved.id}`);
+    expect(await readPosts(page)).toEqual([updated]);
+    page.once('dialog', async (dialog) => dialog.accept());
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await expect(page).toHaveURL('/blogs');
+    expect(await readPosts(page)).toEqual([]);
+    await page.reload();
+    await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
+    if (theme === 'dark') {
+      await expect(page.getByRole('main')).toHaveCSS('background-color', 'rgb(2, 6, 23)');
+      await expect(page.locator('html')).toHaveClass(/dark/);
+    }
   });
-  await page.getByRole('button', { name: 'Delete', exact: true }).click();
-  await expect(page).toHaveURL(`/blog/${saved.id}`);
-  expect(await readPosts(page)).toEqual([updated]);
-  page.once('dialog', async (dialog) => dialog.accept());
-  await page.getByRole('button', { name: 'Delete', exact: true }).click();
-  await expect(page).toHaveURL('/blogs');
-  expect(await readPosts(page)).toEqual([]);
-  await page.reload();
-  await expect(page.getByText('No blogs yet. Be the first to write one!')).toBeVisible();
-});
+}
 
 test('two real accounts respect ownership while administrator edits, creates and deletes', async ({ page }) => {
   await page.goto('/');
