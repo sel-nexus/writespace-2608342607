@@ -231,3 +231,74 @@ it('shows built-in inventory and graceful empty posts for corrupt initial reads'
   expect(accountDelete('admin')).toBeDisabled();
   expect(localStorage.getItem('writespace_users')).toBe('broken');
 });
+
+
+it.each(['light', 'dark'])('keeps admin CRUD and paired surfaces usable in %s via theme control', async (theme) => {
+  authenticate('admin', 'admin');
+  const post = createPost({ title: 'Themed writing', content: 'Keep this writing' });
+  const user = setup();
+  if (theme === 'dark') await user.click(screen.getByRole('button', { name: /switch to dark mode/i }));
+  expect(document.documentElement.classList.contains('dark')).toBe(theme === 'dark');
+  expect(screen.getByRole('main')).toHaveClass('bg-slate-50', 'dark:bg-slate-950', 'dark:text-slate-100');
+  const stat = screen.getByRole('region', { name: 'Total Posts' });
+  expect(stat).toHaveTextContent('1');
+  expect(stat).toHaveClass('bg-white', 'dark:bg-slate-900');
+  expect(stat.querySelector('p')).toHaveClass('dark:text-slate-100');
+  expect(screen.getByRole('article')).toHaveClass('dark:bg-slate-900', 'dark:border-slate-700');
+  const removePost = screen.getByRole('button', { name: 'Delete Themed writing' });
+  expect(removePost).toHaveClass('dark:bg-red-950', 'dark:text-red-300', 'dark:focus-visible:ring-orange-400');
+  await user.click(screen.getByRole('link', { name: 'Manage Users' }));
+  await user.click(screen.getByRole('button', { name: 'Create User' }));
+  expect(screen.getByLabelText('Username')).toHaveAccessibleDescription('This field is required.');
+  expect(screen.getAllByRole('alert')[0]).toHaveClass('dark:text-red-300');
+  for (const label of ['Display Name', 'Username', 'Password', 'Role']) {
+    expect(screen.getByLabelText(label)).toHaveClass('dark:bg-slate-800', 'dark:text-slate-100', 'dark:focus:ring-orange-400');
+  }
+  await user.type(screen.getByLabelText('Display Name'), 'Reader');
+  await user.type(screen.getByLabelText('Username'), 'reader');
+  await user.type(screen.getByLabelText('Password'), 'demo');
+  await user.click(screen.getByRole('button', { name: 'Create User' }));
+  expect(screen.getByRole('status')).toHaveTextContent('Account reader created.');
+  expect(screen.getByRole('status')).toHaveClass('dark:text-teal-300');
+  const table = screen.getByRole('table');
+  expect(table.parentElement).toHaveClass('dark:bg-slate-900', 'sm:block');
+  expect(table.querySelector('thead').tagName).toBe('THEAD');
+  const mobile = screen.getByRole('article', { name: 'Account reader' });
+  expect(mobile).toHaveClass('dark:bg-slate-900', 'dark:text-slate-100');
+  expect(within(mobile).getByText('user', { exact: true })).toHaveClass('dark:bg-indigo-950', 'dark:text-indigo-200');
+  expect(accountDelete('admin')).toBeDisabled();
+  expect(accountDelete('admin')).toHaveAccessibleDescription('Default admin cannot be deleted.');
+  vi.spyOn(window, 'confirm').mockReturnValue(false);
+  await user.click(accountDelete('reader'));
+  expect(getUsers()).toHaveLength(1);
+  vi.mocked(window.confirm).mockReturnValue(true);
+  await user.click(accountDelete('reader'));
+  expect(getUsers()).toEqual([]);
+  expect(getPosts()).toEqual([post]);
+  await user.click(screen.getByRole('link', { name: 'Back to Dashboard' }));
+  await user.click(screen.getByRole('button', { name: 'Delete Themed writing' }));
+  expect(getPosts()).toEqual([]);
+  expect(screen.getByText('No posts yet. Make room for the first thought.')).toHaveClass('dark:bg-slate-900', 'dark:text-slate-300');
+  expect(document.documentElement.classList.contains('dark')).toBe(theme === 'dark');
+});
+
+it.each(['light', 'dark'])('retains protected current account and inline write errors in %s', async (theme) => {
+  authenticate('admin', 'admin');
+  const current = seed('admin', 'editor');
+  authenticate('editor', 'demo');
+  const user = setup('/users');
+  if (theme === 'dark') await user.click(screen.getByRole('button', { name: /switch to dark mode/i }));
+  expect(accountDelete('editor')).toBeDisabled();
+  expect(accountDelete('editor')).toHaveAccessibleDescription('Your current account cannot be deleted.');
+  const mobile = screen.getByRole('article', { name: 'Account editor' });
+  expect(within(mobile).getByRole('button')).toBeDisabled();
+  expect(within(mobile).getByText('Admin', { exact: true })).toHaveClass('dark:bg-violet-950', 'dark:text-violet-200');
+  fill('new-reader');
+  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('full'); });
+  await user.click(screen.getByRole('button', { name: 'Create User' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('Unable to save accounts');
+  expect(screen.getByRole('alert')).toHaveClass('dark:bg-red-950', 'dark:text-red-300');
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  expect(getUsers()).toEqual([current]);
+  expect(screen.getByLabelText('Username')).toHaveValue('new-reader');
+});

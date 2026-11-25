@@ -58,17 +58,17 @@ export default function UserManagement() {
   if (!error && !session) return <Navigate to="/login" replace />;
   if (!error && session.role !== 'admin') return <Navigate to="/blogs" replace />;
   return (
-    <main id="main-content" className="min-h-[calc(100dvh-64px)] bg-slate-50 px-4 py-10 sm:px-6">
+    <main id="main-content" className="min-h-[calc(100dvh-64px)] bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 px-4 py-10 sm:px-6">
       <div className="mx-auto max-w-6xl">
-        <Link to="/admin" className="rounded text-orange-800 focus-visible:ring-2">Back to Dashboard</Link>
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-orange-800">People behind the words</p>
+        <Link to="/admin" className="rounded text-orange-800 dark:text-orange-300 focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-950">Back to Dashboard</Link>
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-orange-800 dark:text-orange-300">People behind the words</p>
         <h1 className="mt-3 font-serif text-4xl font-bold tracking-tight sm:text-5xl">User Management</h1>
-        <p className="mt-4 max-w-2xl leading-relaxed text-slate-600">
+        <p className="mt-4 max-w-2xl leading-relaxed text-slate-600 dark:text-slate-300">
           Local accounts for this browser only. Deleting an account retains its posts and author name.
         </p>
-        <form onSubmit={submit} noValidate className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+        <form onSubmit={submit} noValidate className="mt-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 sm:p-8">
           <h2 className="font-serif text-2xl font-bold">Create User</h2>
-          <p id="demo-password-warning" className="mt-2 text-sm text-slate-600">Passwords are plaintext demo data. Never use real passwords.</p>
+          <p id="demo-password-warning" className="mt-2 text-sm text-slate-600 dark:text-slate-300">Passwords are plaintext demo data. Never use real passwords.</p>
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             {['displayName', 'username', 'password'].map((key) => (
               <div key={key}>
@@ -86,10 +86,10 @@ export default function UserManagement() {
                   aria-describedby={errors[key] ? `account-error-${key}` : key === 'password' ? 'demo-password-warning' : undefined}
                   value={fields[key]}
                   onChange={change}
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-700"
+                  className="mt-2 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-700 dark:focus:ring-orange-400"
                 />
                 {errors[key] && (
-                  <p id={`account-error-${key}`} role="alert" className="mt-2 text-sm text-red-700">{errors[key]}</p>
+                  <p id={`account-error-${key}`} role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors[key]}</p>
                 )}
               </div>
             ))}
@@ -104,34 +104,34 @@ export default function UserManagement() {
                 aria-describedby={errors.role ? 'account-error-role' : undefined}
                 value={fields.role}
                 onChange={change}
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-700"
+                className="mt-2 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-700 dark:focus:ring-orange-400"
               >
                 <option value="admin">Admin</option>
                 <option value="user">user</option>
               </select>
               {errors.role && (
-                <p id="account-error-role" role="alert" className="mt-2 text-sm text-red-700">{errors.role}</p>
+                <p id="account-error-role" role="alert" className="mt-2 text-sm text-red-700 dark:text-red-300">{errors.role}</p>
               )}
             </div>
           </div>
           <button
             type="submit"
-            className="mt-6 rounded-full bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900 focus-visible:ring-2"
+            className="mt-6 rounded-full bg-orange-800 px-6 py-3 font-semibold text-white hover:bg-orange-900 focus-visible:ring-2 focus-visible:ring-orange-700 focus-visible:ring-offset-2 dark:focus-visible:ring-orange-400 dark:focus-visible:ring-offset-slate-950"
           >
             Create User
           </button>
         </form>
         {error && (
-          <p role="alert" className="mt-4 rounded-lg bg-red-50 p-4 text-red-700">{error}</p>
+          <p role="alert" className="mt-4 rounded-lg bg-red-50 dark:bg-red-950 p-4 text-red-700 dark:text-red-300">{error}</p>
         )}
-        <p role="status" aria-live="polite" className="mt-4 text-sm text-teal-800">{status}</p>
+        <p role="status" aria-live="polite" className="mt-4 text-sm text-teal-800 dark:text-teal-300">{status}</p>
         <section aria-labelledby="accounts-heading" className="mt-10">
           <h2 id="accounts-heading" className="font-serif text-3xl font-bold">All Accounts</h2>
-          <p className="mt-2 text-slate-600">Includes the permanently available built-in administrator.</p>
-          <div className="mt-6 hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white sm:block">
+          <p className="mt-2 text-slate-600 dark:text-slate-300">Includes the permanently available built-in administrator.</p>
+          <div className="mt-6 hidden overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 sm:block">
             <table className="w-full text-left">
               <caption className="sr-only">Local accounts including built-in administrator</caption>
-              <thead className="bg-slate-100 text-sm text-slate-700">
+              <thead className="bg-slate-100 dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200">
                 <tr>
                   {['Display Name', 'Username', 'Role', 'Created', 'Actions'].map((label) => (
                     <th key={label} scope="col" className="px-4 py-3">{label}</th>
