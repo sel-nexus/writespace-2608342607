@@ -13,12 +13,21 @@ test.afterEach(() => {
   expect(errors).toEqual([]);
 });
 
-/** Assert both the semantic control state and the actual root appearance. */
+/** Assert the semantic icon state, root appearance, and right-side placement. */
 async function expectTheme(page, theme) {
   const button = page.getByRole('button', { name: 'Dark mode' });
   await expect(button).toHaveCount(1);
   await expect(button).toBeVisible();
   await expect(button).toHaveAttribute('aria-pressed', String(theme === 'dark'));
+  await expect(button).toHaveText('');
+  await expect(button.locator(`svg[data-theme-icon="${theme === 'dark' ? 'moon' : 'sun'}"]`)).toBeVisible();
+  const [navBox, logoBox, toggleBox] = await Promise.all([
+    page.locator('header nav').boundingBox(),
+    page.getByRole('link', { name: 'WriteSpace home' }).boundingBox(),
+    button.boundingBox(),
+  ]);
+  expect(toggleBox.x).toBeGreaterThan(logoBox.x + logoBox.width);
+  expect(toggleBox.x + toggleBox.width / 2).toBeGreaterThan(navBox.x + navBox.width * 0.65);
   await expect.poll(() => page.evaluate(() => ({
     dark: document.documentElement.classList.contains('dark'),
     scheme: document.documentElement.style.colorScheme,
@@ -37,11 +46,18 @@ for (const width of [390, 1280]) {
     await page.goto('/');
     await expectTheme(page, 'light');
     const toggle = page.getByRole('button', { name: 'Dark mode' });
-    // Tab from the start of the document to the persistent header control.
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
+    // Tab from the start of the document through visible header items to the right-side control.
+    const tabsToToggle = width < 640 ? 3 : 5;
+    for (let step = 0; step < tabsToToggle; step += 1) {
+      await page.keyboard.press('Tab');
+    }
     await expect(toggle).toBeFocused();
+    if (width >= 640) {
+      const getStartedBox = await page.getByRole('navigation', { name: 'Public navigation' })
+        .getByRole('link', { name: 'Get Started', exact: true }).boundingBox();
+      const toggleBox = await toggle.boundingBox();
+      expect(toggleBox.x).toBeGreaterThanOrEqual(getStartedBox.x + getStartedBox.width);
+    }
     expect(await toggle.evaluate((button) => getComputedStyle(button).boxShadow)).not.toBe('none');
     await page.keyboard.press('Enter');
     await expectTheme(page, 'dark');

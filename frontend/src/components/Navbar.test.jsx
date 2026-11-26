@@ -100,3 +100,16 @@ it('renders no authenticated controls for a missing session', () => {
   );
   expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
 });
+it('places the icon-only theme toggle on the right side after authenticated menu items', () => {
+  setup('admin');
+  const nav = screen.getByRole('navigation', { name: 'Authenticated navigation' });
+  const menu = document.getElementById('authenticated-menu');
+  const toggle = screen.getByRole('button', { name: 'Dark mode' });
+  expect(toggle).toHaveTextContent('');
+  expect(toggle.querySelector('svg')).toBeInTheDocument();
+  expect(menu).toHaveClass('order-3', 'sm:order-none', 'sm:ml-auto');
+  expect(toggle.parentElement).toHaveClass('order-2', 'sm:order-none');
+  expect(toggle.parentElement).not.toHaveClass('sm:contents');
+  const children = [...nav.children];
+  expect(children.indexOf(menu)).toBeLessThan(children.indexOf(toggle.parentElement));
+});

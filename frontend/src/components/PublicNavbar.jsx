@@ -38,29 +38,16 @@ export function PublicNavbar({ session = null, theme = 'light', onThemeToggle })
           to="/"
           aria-label="WriteSpace home"
           onClick={closeMenu}
-          className={'rounded-lg font-serif text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 '
-            + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400'}
+          className={'order-1 rounded-lg font-serif text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 '
+            + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 sm:order-none'}
         >
           WriteSpace
           <span className="text-orange-800 dark:text-orange-300">.</span>
         </Link>
-        <div className="flex items-center gap-2 sm:contents">
-          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
-          <button
-            type="button"
-            aria-expanded={menuOpen}
-            aria-controls="public-menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={'rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-100 '
-              + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 sm:hidden'}
-          >
-            {menuOpen ? 'Close menu' : 'Open menu'}
-          </button>
-        </div>
         <div
           id="public-menu"
-          className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col gap-3 `
-            + 'sm:flex sm:w-auto sm:flex-row sm:items-center'}
+          className={`${menuOpen ? 'flex' : 'hidden'} order-3 w-full flex-col gap-3 `
+            + 'sm:order-none sm:ml-auto sm:flex sm:w-auto sm:flex-row sm:items-center'}
         >
           {signedIn ? (
             <>
@@ -106,6 +93,19 @@ export function PublicNavbar({ session = null, theme = 'light', onThemeToggle })
               </Link>
             </>
           )}
+        </div>
+        <div className="order-2 flex items-center gap-2 sm:order-none">
+          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+          <button
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="public-menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={'rounded-lg border border-slate-300 dark:border-slate-500 px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-100 '
+              + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 sm:hidden'}
+          >
+            {menuOpen ? 'Close menu' : 'Open menu'}
+          </button>
         </div>
       </nav>
     </header>

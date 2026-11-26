@@ -16,34 +16,44 @@ function ControlledToggle() {
 }
 
 describe('ThemeToggle', () => {
-  it('defaults to a named unpressed light button and safely accepts no callback', async () => {
+  it('defaults to an unpressed icon button without text and safely accepts no callback', async () => {
     const user = userEvent.setup();
     render(<ThemeToggle />);
     const button = screen.getByRole('button', { name: 'Dark mode', pressed: false });
-    expect(button).toHaveTextContent('Light');
+    expect(button).toHaveTextContent('');
+    expect(button).toHaveAttribute('title', 'Switch to dark mode');
+    const icon = button.querySelector('svg[data-theme-icon="sun"]');
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(button).toHaveAttribute('type', 'button');
     await user.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'false');
   });
-  it('reflects controlled props rather than creating independent state', async () => {
+  it('reflects controlled props and swaps icons rather than creating independent state', async () => {
     const user = userEvent.setup();
     const { rerender } = render(<ThemeToggle theme="dark" />);
     const button = screen.getByRole('button', { name: 'Dark mode', pressed: true });
-    expect(button).toHaveTextContent('Dark');
+    expect(button).toHaveTextContent('');
+    expect(button).toHaveAttribute('title', 'Switch to light mode');
+    expect(button.querySelector('svg[data-theme-icon="moon"]')).toBeInTheDocument();
     await user.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'true');
     rerender(<ThemeToggle theme="light" />);
     expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(button.querySelector('svg[data-theme-icon="sun"]')).toBeInTheDocument();
   });
   it('switches both ways by pointer without touching storage or submitting a form', async () => {
     const user = userEvent.setup();
     localStorage.setItem('writespace_theme', 'unchanged');
     render(<ControlledToggle />);
     const button = screen.getByRole('button', { name: 'Dark mode' });
+    expect(button.querySelector('svg[data-theme-icon="sun"]')).toBeInTheDocument();
     await user.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(button.querySelector('svg[data-theme-icon="moon"]')).toBeInTheDocument();
     await user.click(button);
     expect(button).toHaveAttribute('aria-pressed', 'false');
+    expect(button.querySelector('svg[data-theme-icon="sun"]')).toBeInTheDocument();
     expect(localStorage.getItem('writespace_theme')).toBe('unchanged');
     localStorage.removeItem('writespace_theme');
   });

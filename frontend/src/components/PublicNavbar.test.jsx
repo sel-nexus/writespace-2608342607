@@ -68,4 +68,18 @@ describe('PublicNavbar', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByLabelText('Selected route')).toHaveTextContent('/login');
   });
+
+  it('places the icon-only theme toggle on the right side after public navigation links', () => {
+    mount();
+    const nav = screen.getByRole('navigation', { name: 'Public navigation' });
+    const menu = document.getElementById('public-menu');
+    const toggle = screen.getByRole('button', { name: 'Dark mode' });
+    expect(toggle).toHaveTextContent('');
+    expect(toggle.querySelector('svg')).toBeInTheDocument();
+    expect(menu).toHaveClass('order-3', 'sm:order-none', 'sm:ml-auto');
+    expect(toggle.parentElement).toHaveClass('order-2', 'sm:order-none');
+    expect(toggle.parentElement).not.toHaveClass('sm:contents');
+    const children = [...nav.children];
+    expect(children.indexOf(menu)).toBeLessThan(children.indexOf(toggle.parentElement));
+  });
 });

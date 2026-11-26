@@ -62,29 +62,13 @@ export function Navbar({ session, onSessionChange, theme = 'light', onThemeToggl
         aria-label="Authenticated navigation"
         className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6"
       >
-        <Link to="/" aria-label="WriteSpace home" className={`${focus} font-serif text-2xl font-bold text-slate-900 dark:text-slate-100`}>
+        <Link to="/" aria-label="WriteSpace home" className={`${focus} order-1 font-serif text-2xl font-bold text-slate-900 dark:text-slate-100 sm:order-none`}>
           WriteSpace
           <span className="text-orange-800 dark:text-orange-300">.</span>
         </Link>
-        <div className="flex items-center gap-2 sm:contents">
-          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
-          <button
-            id="navigation-trigger"
-            type="button"
-            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={menuOpen}
-            aria-controls="authenticated-menu"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`${focus} border border-slate-300 dark:border-slate-500 p-3 sm:hidden`}
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
         <div
           id="authenticated-menu"
-          className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center`}
+          className={`${menuOpen ? 'flex' : 'hidden'} order-3 w-full flex-col gap-3 sm:order-none sm:ml-auto sm:flex sm:w-auto sm:flex-row sm:items-center`}
         >
           {links.map(([to, label]) => (
             <NavLink
@@ -130,6 +114,22 @@ export function Navbar({ session, onSessionChange, theme = 'light', onThemeToggl
               </button>
             </div>
           </div>
+        </div>
+        <div className="order-2 flex items-center gap-2 sm:order-none">
+          <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+          <button
+            id="navigation-trigger"
+            type="button"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={menuOpen}
+            aria-controls="authenticated-menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={`${focus} border border-slate-300 dark:border-slate-500 p-3 sm:hidden`}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </div>
       </nav>
       {error && (
