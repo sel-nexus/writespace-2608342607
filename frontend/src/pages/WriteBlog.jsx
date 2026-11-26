@@ -63,7 +63,11 @@ export default function WriteBlog() {
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-orange-800 dark:text-orange-300">Room for your words</p>
             <h1 className="font-serif text-4xl font-bold tracking-tight sm:text-5xl">{id ? 'Edit Post' : 'Write a Post'}</h1>
             <p className="mt-4 text-slate-600 dark:text-slate-400">Plain text, saved in this browser. Use only non-sensitive demo writing.</p>
-            <form onSubmit={submit} noValidate className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-700 dark:bg-slate-900">
+            <form
+              onSubmit={submit}
+              noValidate
+              className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-700 dark:bg-slate-900"
+            >
               <label htmlFor="post-title" className="block font-medium">Title</label>
               <input
                 id="post-title"

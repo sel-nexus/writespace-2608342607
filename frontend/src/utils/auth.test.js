@@ -114,6 +114,34 @@ describe('local identity', () => {
     expect(localStorage.getItem('writespace_users')).toBe(raw);
     expect(getSession()).toBeNull();
   });
+  it.each(['duplicate ids', 'casefold usernames', 'reserved admin', 'padded usernames'])
+  ('rejects schema-valid stored accounts with %s at authenticate/register/session read without changing bytes', (kind) => {
+    const identity = register(fields);
+    register({ ...fields, displayName: 'Editor', username: 'editor' });
+    const [one, two] = getUsers();
+    const records = kind === 'duplicate ids' ? [one, { ...two, id: one.id }]
+      : kind === 'casefold usernames' ? [one, { ...two, username: 'READER' }]
+        : kind === 'reserved admin' ? [one, { ...two, username: 'Admin' }]
+          : [one, { ...two, username: ' editor ' }];
+    const accounts = JSON.stringify(records, null, 2);
+    localStorage.setItem('writespace_users', accounts);
+    localStorage.setItem('writespace_session', JSON.stringify(identity, null, 2));
+    const session = localStorage.getItem('writespace_session');
+    // Every record passes the storage schema, isolating the collection-level condition.
+    expect(getUsers()).toEqual(records);
+    expect(() => authenticate(one.username, one.password)).toThrow('Unable to read local accounts. Existing data was not changed.');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+    expect(() => register({ ...fields, username: 'another-reader' })).toThrow('Unable to read local accounts. Existing data was not changed.');
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+    expect(getSession()).toBeNull();
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+    expect(localStorage.getItem('writespace_session')).toBe(session);
+    expect(authenticate('admin', 'admin')).toEqual(admin);
+    expect(getSession()).toEqual(admin);
+    expect(localStorage.getItem('writespace_users')).toBe(accounts);
+  });
   it('fails closed on absent, malformed, invalid-role, mismatched and deleted accounts', () => {
     expect(getSession()).toBeNull();
     const valid = register(fields);

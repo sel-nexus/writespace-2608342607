@@ -35,20 +35,20 @@ test('guest sees the empty landing and follows public auth actions', async ({ pa
   await openPublicMenu(page);
   await publicNav.getByRole('link', { name: 'Login' }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.getByRole('link', { name: 'Start Reading' }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.getByRole('link', { name: 'Get Started Free' }).click();
   await expect(page).toHaveURL(/\/register$/);
-  await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
   await openPublicMenu(page);
   await publicNav.getByRole('link', { name: 'Get Started', exact: true }).click();
   await expect(page).toHaveURL(/\/register$/);
-  await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
 
   for (const [name, destination, heading] of [
@@ -61,7 +61,7 @@ test('guest sees the empty landing and follows public auth actions', async ({ pa
     await expect(page).toHaveURL(destination);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(heading);
     if (name !== 'Home') {
-      await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+      await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
       await expect(page).toHaveURL(/\/$/);
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('WriteSpace.');
     }
@@ -85,7 +85,7 @@ test('latest previews come only from real local storage, newest first and limite
   });
   await page.getByRole('link', { name: 'Start Reading' }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByRole('link', { name: 'WriteSpace home', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'WriteSpace home', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
   expect(await page.evaluate(() => localStorage.getItem('writespace_posts'))).toBe(seededPosts);
   const latest = page.getByRole('region', { name: 'Latest from the Blog' });

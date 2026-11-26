@@ -38,6 +38,31 @@ it.each(['displayName', 'username', 'password'])('rejects blank %s', (key) => {
   expect(validateAccount({ ...fields(), [key]: ' \n ' })[key]).toBe('This field is required.');
   expect(() => createAccount({ ...fields(), [key]: ' ' })).toThrow();
 });
+const invalidFields = [
+  ['missing', undefined], ['null', null], ['number', 42], ['boolean', true],
+  ['object', {}], ['array', []], ['blank', ' \n '],
+];
+it.each(['displayName', 'username', 'password', 'role'].flatMap((key) => {
+  const cases = key === 'role' ? [...invalidFields, ['unknown role', 'owner']] : invalidFields;
+  return cases.map(([kind, value]) => [key, kind, value]);
+}))('rejects independent %s when %s at validation/create without changing collections or session', (key, kind, value) => {
+  createAccount(fields());
+  createPost({ title: 'Retained post', content: 'Retained content' });
+  const users = localStorage.getItem('writespace_users');
+  const posts = localStorage.getItem('writespace_posts');
+  const session = localStorage.getItem('writespace_session');
+  const candidate = fields('user', 'another-reader');
+  if (kind === 'missing') delete candidate[key];
+  else candidate[key] = value;
+  const errors = { [key]: key === 'role' ? 'Choose Admin or user.' : 'This field is required.' };
+  expect(getSession().role).toBe('admin');
+  expect(validateAccount(candidate)).toEqual(errors);
+  expect(localStorage.getItem('writespace_users')).toBe(users);
+  expect(() => createAccount(candidate)).toThrow('Please correct the account fields.');
+  expect(localStorage.getItem('writespace_users')).toBe(users);
+  expect(localStorage.getItem('writespace_posts')).toBe(posts);
+  expect(localStorage.getItem('writespace_session')).toBe(session);
+});
 it.each(['admin', ' ADMIN ', 'Admin'])('rejects reserved username %s', (username) => {
   expect(validateAccount(fields('user', username)).username).toMatch(/reserved/);
   expect(() => createAccount(fields('user', username))).toThrow();

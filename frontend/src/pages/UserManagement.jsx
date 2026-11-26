@@ -71,7 +71,9 @@ export default function UserManagement() {
         </p>
         <form onSubmit={submit} noValidate className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 dark:border-slate-700 dark:bg-slate-900">
           <h2 className="font-serif text-2xl font-bold">Create User</h2>
-          <p id="demo-password-warning" className="mt-2 text-sm text-slate-600 dark:text-slate-400">Passwords are plaintext demo data. Never use real passwords.</p>
+          <p id="demo-password-warning" className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Passwords are plaintext demo data. Never use real passwords.
+          </p>
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
             {['displayName', 'username', 'password'].map((key) => (
               <div key={key}>

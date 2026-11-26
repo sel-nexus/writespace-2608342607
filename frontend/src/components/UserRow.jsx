@@ -58,7 +58,10 @@ export function UserRow({ account, currentId, onDelete, mobile = false }) {
   );
   if (mobile) {
     return (
-      <article aria-label={`Account ${account.username}`} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+      <article
+        aria-label={`Account ${account.username}`}
+        className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"
+      >
         {identity}
         <dl className="my-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-sm">
           <dt className="text-slate-600 dark:text-slate-400">Username</dt>

@@ -18,3 +18,4 @@ graphify-out/cost.json
 frontend/test-results/
 frontend/playwright-report/
 frontend/visual-output/
+test-results/

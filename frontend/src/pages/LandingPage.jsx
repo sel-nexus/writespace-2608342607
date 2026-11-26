@@ -68,7 +68,8 @@ export default function LandingPage({ session = null }) {
                   to="/register"
                   className={'rounded-full bg-orange-800 dark:bg-orange-800 px-6 py-3 text-center font-semibold text-white '
                     + 'shadow-sm transition-colors hover:bg-orange-900 dark:hover:bg-orange-900 focus-visible:outline-none '
-                    + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 '
+                    + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400 '
+                    + 'focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 '
                     + 'motion-reduce:transition-none'}
                 >
                   Get Started Free

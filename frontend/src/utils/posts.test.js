@@ -25,6 +25,31 @@ it('validates each field independently', () => {
   expect(validatePost({ title: '', content: 'yes' })).toEqual({ title: 'This field is required.' });
   expect(validatePost(writing())).toEqual({});
 });
+const invalidText = [
+  ['missing', undefined], ['null', null], ['number', 42], ['boolean', true],
+  ['object', {}], ['array', []],
+];
+it.each(['title', 'content'].flatMap((key) => invalidText.map(([kind, value]) => [key, kind, value])))
+('rejects independent %s when %s at validation and authorized create/update without changing storage', (key, kind, value) => {
+  reader();
+  const post = createPost(writing());
+  createPost({ title: 'Other post', content: 'Keep this too' });
+  const posts = localStorage.getItem('writespace_posts');
+  const users = localStorage.getItem('writespace_users');
+  const session = localStorage.getItem('writespace_session');
+  const candidate = writing();
+  if (kind === 'missing') delete candidate[key];
+  else candidate[key] = value;
+  expect(canManagePost(post)).toBe(true);
+  expect(validatePost(candidate)).toEqual({ [key]: 'This field is required.' });
+  expect(localStorage.getItem('writespace_posts')).toBe(posts);
+  expect(() => createPost(candidate)).toThrow('Title and content are required.');
+  expect(localStorage.getItem('writespace_posts')).toBe(posts);
+  expect(() => updatePost(post.id, candidate)).toThrow('Title and content are required.');
+  expect(localStorage.getItem('writespace_posts')).toBe(posts);
+  expect(localStorage.getItem('writespace_users')).toBe(users);
+  expect(localStorage.getItem('writespace_session')).toBe(session);
+});
 it.each(['user', 'admin'])('creates and rereads %s writing with canonical metadata', (role) => {
   const identity = role === 'admin' ? authenticate('admin', 'admin') : reader();
   const post = createPost({ ...writing(), authorId: 'fake', authorName: 'fake', id: 'fake', createdAt: 'fake' });

@@ -57,7 +57,8 @@ export default function RegisterPage({ onSessionChange }) {
         className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm sm:p-10"
       >
         <Link to="/" aria-label="WriteSpace home"
-          className="dark:text-slate-100 rounded-lg font-serif text-2xl font-bold focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400"
+          className={'dark:text-slate-100 rounded-lg font-serif text-2xl font-bold '
+            + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400'}
         >
           WriteSpace
           <span className="text-orange-800 dark:text-orange-300">.</span>
@@ -177,7 +178,8 @@ export default function RegisterPage({ onSessionChange }) {
         <p className="mt-6 text-sm text-slate-600 dark:text-slate-400">
           Already have an account?
           <Link to="/login"
-            className="ml-2 rounded-sm font-semibold text-orange-800 dark:text-orange-300 underline focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400"
+            className={'ml-2 rounded-sm font-semibold text-orange-800 dark:text-orange-300 underline '
+              + 'focus-visible:ring-2 focus-visible:ring-orange-700 dark:focus-visible:ring-orange-400'}
           >
             Login
           </Link>

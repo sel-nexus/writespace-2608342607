@@ -64,7 +64,7 @@ test('invalid then valid registration, reload, logout and persisted login journe
   await page.getByLabel('Confirm Password').fill('demo-password');
   await page.getByRole('button', { name: 'Register', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('already taken');
-  await page.getByRole('link', { name: 'Login', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'Login', exact: true }).click();
   await page.getByLabel('Username').fill('journey-reader');
   await page.getByLabel('Password').fill('wrong');
   await page.getByRole('button', { name: 'Login', exact: true }).click();

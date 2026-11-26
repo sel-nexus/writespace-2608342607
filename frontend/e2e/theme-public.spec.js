@@ -81,6 +81,7 @@ for (const theme of ['light', 'dark']) {
       await page.reload();
       await expectTheme(page, theme);
       await page.getByRole('link', { name: 'WriteSpace home' }).click();
+      await openNavigation(page);
       await expect(page.getByRole('img', { name: 'user avatar' })).toHaveText('📚');
       await expect(page.getByRole('link', { name: 'Start Reading' })).toHaveAttribute('href', '/blogs');
       await openNavigation(page);
