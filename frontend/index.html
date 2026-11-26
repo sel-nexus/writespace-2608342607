@@ -7,6 +7,19 @@
     <meta name="theme-color" content="#9a3412" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%239a3412'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='44' font-family='Georgia' fill='white'%3EW%3C/text%3E%3C/svg%3E" />
     <title>WriteSpace</title>
+    <script>
+      // Restore before visible content; blocked or invalid storage defaults to light.
+      (function () {
+        var theme = 'light';
+        try {
+          if (window.localStorage.getItem('writespace_theme') === 'dark') theme = 'dark';
+        } catch (_) {
+          theme = 'light';
+        }
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

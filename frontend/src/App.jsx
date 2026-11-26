@@ -13,14 +13,28 @@ import ReadBlog from './pages/ReadBlog';
 import WriteBlog from './pages/WriteBlog';
 import AdminDashboard from './pages/AdminDashboard';
 import UserManagement from './pages/UserManagement';
+import { applyTheme, readTheme, writeTheme } from './utils/theme';
 
 /** Render completed routes and choose their session-aware header.
  * Returns:
  *   The currently implemented application surface.
  */
 export default function App() {
+  const [theme, setTheme] = useState(readTheme);
   const [session, setSession] = useState(getSession);
   const location = useLocation();
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  /** Switch appearance without remounting routes or modifying identity/content. */
+  function toggleTheme() {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(nextTheme);
+    setTheme(nextTheme);
+    writeTheme(nextTheme);
+  }
 
   /** Reread persistent identity after login, registration, logout or external changes. */
   function refreshSession() {
@@ -41,23 +55,27 @@ export default function App() {
   const authPage = ['/login', '/register'].includes(location.pathname);
 
   return (
-    <div className="min-h-[100dvh] bg-white font-sans text-slate-800">
+    <div className="min-h-[100dvh] bg-white font-sans text-slate-800 dark:bg-slate-950 dark:text-slate-100">
       <a
         href="#main-content"
         className={'sr-only rounded-lg bg-white p-3 text-orange-800 focus:not-sr-only focus:fixed '
+          + 'dark:bg-slate-900 dark:text-orange-300 dark:focus:ring-orange-400 '
           + 'focus:left-4 focus:top-4 focus:z-30 focus:ring-2 focus:ring-orange-700'}
       >
         Skip to content
       </a>
       {!authPage && location.pathname !== '/' && session && (
-        <Navbar session={session} onSessionChange={refreshSession} />
+        <Navbar session={session} onSessionChange={refreshSession} theme={theme} onThemeToggle={toggleTheme} />
+      )}
+      {authPage && (
+        <PublicNavbar session={session} theme={theme} onThemeToggle={toggleTheme} />
       )}
       <Routes>
         <Route
           path="/"
           element={
             <>
-              <PublicNavbar session={session} />
+              <PublicNavbar session={session} theme={theme} onThemeToggle={toggleTheme} />
               <LandingPage session={session} />
             </>
           }
