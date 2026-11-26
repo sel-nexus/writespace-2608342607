@@ -15,7 +15,7 @@ export function getAvatar(role) {
     <span
       role="img"
       aria-label={`${avatarRole} avatar`}
-      className={`${styles[avatarRole]} inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-white`}
+      className={`${styles[avatarRole]} inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg text-white dark:ring-1 dark:ring-slate-500`}
     >
       {avatarRole === 'admin' ? '👑' : '📚'}
     </span>
